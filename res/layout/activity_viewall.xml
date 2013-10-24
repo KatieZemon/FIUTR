@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="Networks" >
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 1" />
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 2" />
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 3" />
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 4" />
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 5" />
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 6" />
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 7" />
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 8" />
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 9" />
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 10" />
+
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 11" />
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 12" />
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 13" />
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 14" />
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 15" />
+        <Preference
+            android:key="customPref"
+            android:summary="Info"
+            android:title="SSID 16" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

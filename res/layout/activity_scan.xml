@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="Preferences" >
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="pref_opt1"
+        android:title="Continuous Scan" />
+
+    <PreferenceCategory android:title="Select Networks" >
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_opt1"
+            android:summary="Tick to set this option"
+            android:title="SSID 1" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_opt2"
+            android:summary="Tick to set this option"
+            android:title="SSID 2" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_opt3"
+            android:summary="Tick to set this option"
+            android:title="SSID 3" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_opt4"
+            android:summary="Tick to set this option"
+            android:title="SSID 4" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_opt5"
+            android:summary="Tick to set this option"
+            android:title="SSID 5" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

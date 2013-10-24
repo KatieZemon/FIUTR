@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">FIUTR</string>
+    <string name="title_activity_search">Set Preferences</string>
+    
+    <string name="distanceVal">100</string>
+    <string name="action_search">Search</string>
+    <string name="action_scan">Scan</string>
+    <string name="action_viewAll">View All</string>
+    <string name="action_about">About</string>
+    
+    <string name="mapHereText">Map goes here</string>
+    <string name="aboutInfo">
+        FIUTR\n
+        Free Internet Using Travelers as Resources\n\n
+        Authors:\n
+        Michael Catanzaro\n
+        Miguel Guzman\n
+        Katie Isbell\n
+        Ryan Schmitt\n
+        Ethan Wells\n
+        \n
+        References:\n
+        Google Maps API
+    </string>
+  
+</resources>
