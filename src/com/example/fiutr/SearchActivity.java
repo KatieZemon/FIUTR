@@ -24,7 +24,7 @@ public class SearchActivity extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.custom_pref);
+		setContentView(R.layout.activity_search);
 
 		SharedPreferences customSharedPreference = getSharedPreferences(
 				"myCustomSharedPrefs", Activity.MODE_PRIVATE);
