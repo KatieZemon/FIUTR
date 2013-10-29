@@ -1,0 +1,14 @@
+groupgd - system daemon for the Mighty Group G server
+
+To install
+
+./autogen.sh
+./configure
+make
+sudo make install
+
+You will need Boost and systemd.
+
+If you're installing to a nonstandard prefix or with nonstandard $(bindir) you
+will have to edit data/groupgd.service. Sorry to the 0 people whom this affects.
+It does need fixed though.
