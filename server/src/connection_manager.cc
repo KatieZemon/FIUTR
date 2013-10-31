@@ -56,18 +56,39 @@ ConnectionManager::run()
                                    this,
                                    std::placeholders::_1,
                                    std::placeholders::_2));
+
   // The acceptor io_service will run indefinitely due to the async_wait on the
   // signal set, either until a signal is caught or it is explicitly stopped.
   std::thread acceptor_thread{[this]() {
-                                acceptor_io_service_.run();
+                                 try
+                                 {
+                                   acceptor_io_service_.run();
+                                 }
+                                 catch (std::exception& e)
+                                 {
+                                   connection_io_service_.stop();
+                                   std::clog << SD_ERR << e.what() << std::endl;
+                                 }
                                }};
-  accept_initial_connection();
-  async_accept_additional_connections();
-  // The connection io_service will run until all clients have disconnected.
-  connection_io_service_.run();
+
+  try
+  {
+    accept_initial_connection();
+    async_accept_additional_connections();
+    // The connection io_service will run until all clients have disconnected.
+    connection_io_service_.run();
+  }
+  catch (std::exception& e)
+  {
+    acceptor_io_service_.stop();
+    acceptor_thread.join();
+    throw;
+  }
+
   // Time to shut down. systemd will restart us when a new client appears.
   acceptor_io_service_.stop();
   acceptor_thread.join();
+
   if (rethrow_signal_)
     std::raise(rethrow_signal_);
 }
