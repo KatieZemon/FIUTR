@@ -37,8 +37,18 @@ Connection::Connection(boost::asio::io_service* io_service) noexcept
 
 Connection::~Connection()
 {
-  socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-  socket_.close();
+  try
+  {
+    if (socket_.is_open())
+      {
+        socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+        socket_.close();
+      }
+  }
+  catch (boost::system::system_error& e)
+  {
+    std::clog << SD_ERR << e.what() << std::endl;
+  }
 }
 
 void
