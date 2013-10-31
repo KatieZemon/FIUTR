@@ -29,7 +29,7 @@
 int
 main()
 {
-  if (!sd_booted())
+  if (sd_booted() <= 0)
     {
       std::clog << SD_ALERT << "Not booted with systemd" << std::endl;
       std::exit(1);
