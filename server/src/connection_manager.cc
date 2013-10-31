@@ -22,7 +22,6 @@
 #include "connection_manager.h"
 
 #include <cassert>
-#include <csignal>
 #include <functional>
 #include <iostream>
 #include <memory>
