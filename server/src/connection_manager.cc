@@ -60,10 +60,7 @@ ConnectionManager::run()
   // signal set, either until a signal is caught or it is explicitly stopped.
   std::thread acceptor_thread{[this]() {
                                 acceptor_io_service_.run();
-// FIXME BUG BUG BUG could stop before connection_io_service
-                                if (rethrow_signal_)
-                                  std::raise(rethrow_signal_);
-                                }};
+                               }};
   accept_initial_connection();
   async_accept_additional_connections();
   // The connection io_service will run until all clients have disconnected.
@@ -71,6 +68,8 @@ ConnectionManager::run()
   // Time to shut down. systemd will restart us when a new client appears.
   acceptor_io_service_.stop();
   acceptor_thread.join();
+  if (rethrow_signal_)
+    std::raise(rethrow_signal_);
 }
 
 ConnectionManager::ConnectionManager()
