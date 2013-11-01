@@ -21,6 +21,7 @@
 
 #include "connection.h"
 
+#include <functional>
 #include <iostream>
 
 #include <boost/asio.hpp>
