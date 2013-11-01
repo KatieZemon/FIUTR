@@ -24,10 +24,13 @@
 
 #include <memory>
 
+#include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/streambuf.hpp>
 
 namespace groupgd {
+
+const auto TIMEOUT = boost::posix_time::seconds{30};
 
 class Connection : public std::enable_shared_from_this<Connection>
 {
@@ -37,7 +40,7 @@ public:
   ~Connection();
 
   void
-  async_await_client_query();
+  async_run();
 
   boost::asio::ip::tcp::socket*
   mutable_socket() noexcept { return &socket_; }
@@ -46,6 +49,12 @@ public:
   socket() const noexcept { return socket_; }
 
 private:
+  void
+  async_await_client_query();
+
+  void
+  on_deadline_timer_expired();
+
   void
   on_read_completed(const boost::system::error_code& ec);
 
@@ -58,6 +67,10 @@ private:
   void
   async_send_networks_to_client();
 
+  void
+  stop();
+
+  boost::asio::deadline_timer deadline_timer_;
   boost::asio::ip::tcp::socket socket_;
   boost::asio::streambuf streambuf_;
 };

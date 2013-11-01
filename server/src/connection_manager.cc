@@ -115,7 +115,7 @@ ConnectionManager::accept_initial_connection()
 {
   auto connection = std::make_shared<Connection>(&connection_io_service_);
   acceptor_.accept(*(connection->mutable_socket()));
-  connection->async_await_client_query();
+  connection->async_run();
 }
 
 void
@@ -125,7 +125,7 @@ ConnectionManager::async_accept_additional_connections()
   acceptor_.async_accept(*(connection->mutable_socket()),
                          [=](const boost::system::error_code& ec) {
                            if (!ec)
-                             connection->async_await_client_query();
+                             connection->async_run();
                            else if (ec != boost::asio::error::operation_aborted)
                              throw boost::system::system_error{ec};
                            async_accept_additional_connections();

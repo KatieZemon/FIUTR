@@ -33,18 +33,14 @@
 namespace groupgd {
 
 Connection::Connection(boost::asio::io_service* io_service) noexcept
-: socket_(*io_service)
+: deadline_timer_(*io_service), socket_(*io_service)
 { }
 
 Connection::~Connection()
 {
   try
   {
-    if (socket_.is_open())
-      {
-        socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-        socket_.close();
-      }
+    stop();
   }
   catch (boost::system::system_error& e)
   {
@@ -53,12 +49,34 @@ Connection::~Connection()
 }
 
 void
+Connection::async_run()
+{
+  deadline_timer_.async_wait(std::bind(&Connection::on_deadline_timer_expired,
+                                       shared_from_this()));
+  async_await_client_query();
+}
+
+void
 Connection::async_await_client_query()
 {
+  deadline_timer_.expires_from_now(TIMEOUT);
   boost::asio::async_read_until(socket_, streambuf_, "\r\n",
                                 std::bind(&Connection::on_read_completed,
                                           shared_from_this(),
                                           std::placeholders::_1));
+}
+
+void
+Connection::on_deadline_timer_expired()
+{
+  // Timed operation could have completed after the timer expired, yet before
+  // this function was called. In that case, keep the connection open.
+  if (deadline_timer_.expires_at()
+        <= boost::asio::deadline_timer::traits_type::now())
+    stop();
+  else
+    deadline_timer_.async_wait(std::bind(&Connection::on_deadline_timer_expired,
+                                         shared_from_this()));
 }
 
 void
@@ -109,6 +127,7 @@ void
 Connection::async_send_networks_to_client()
 {
   // TODO implement
+  deadline_timer_.expires_from_now(TIMEOUT);
   auto response = std::string{"I've got no networks for you yet.\r\n"};
   boost::asio::async_write(socket_,
                            boost::asio::buffer(response),
@@ -116,6 +135,18 @@ Connection::async_send_networks_to_client()
                                      shared_from_this(),
                                      std::placeholders::_1,
                                      std::placeholders::_2));
+}
+
+void
+Connection::stop()
+{
+  deadline_timer_.cancel();
+
+  if (socket_.is_open())
+    {
+      socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+      socket_.close();
+    }
 }
 
 }
