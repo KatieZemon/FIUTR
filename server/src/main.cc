@@ -33,7 +33,7 @@ main()
   if (sd_booted() <= 0)
     {
       std::clog << SD_ALERT << "Not booted with systemd" << std::endl;
-      std::exit(1);
+      std::exit(EXIT_FAILURE);
     }
 
   try
@@ -43,6 +43,6 @@ main()
   catch (std::exception& e)
     {
       std::clog << SD_CRIT << e.what() << std::endl;
-      std::exit(1);
+      std::exit(EXIT_FAILURE);
     }
 }

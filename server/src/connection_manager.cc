@@ -68,7 +68,7 @@ ConnectionManager::run()
                                  catch (std::exception& e)
                                  {
                                    connection_io_service_.stop();
-                                   exit_status_ = 1;
+                                   exit_status_ = EXIT_FAILURE;
                                    std::clog << SD_ERR << e.what() << std::endl;
                                  }
                                }};
