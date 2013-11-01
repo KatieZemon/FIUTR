@@ -32,7 +32,8 @@ read_line_from_streambuf(std::streambuf* streambuf)
   auto response = std::string{};
   std::getline(is, response);
   // Prune delimiter
-  response.resize(response.length() - 1);
+  if (response.length() > 0)
+    response.resize(response.length() - 1);
   return response;
 }
 
