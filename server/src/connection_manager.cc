@@ -22,6 +22,7 @@
 #include "connection_manager.h"
 
 #include <cassert>
+#include <cstdlib>
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -67,6 +68,7 @@ ConnectionManager::run()
                                  catch (std::exception& e)
                                  {
                                    connection_io_service_.stop();
+                                   exit_status_ = 1;
                                    std::clog << SD_ERR << e.what() << std::endl;
                                  }
                                }};
@@ -91,6 +93,9 @@ ConnectionManager::run()
 
   if (rethrow_signal_)
     std::raise(rethrow_signal_);
+  
+  if (exit_status_)
+    std::exit(exit_status_);
 }
 
 ConnectionManager::ConnectionManager()
