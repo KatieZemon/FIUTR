@@ -26,13 +26,14 @@
 #include <systemd/sd-daemon.h>
 
 #include "connection_manager.h"
+#include "utility.h"
 
 int
 main()
 {
   if (sd_booted() <= 0)
     {
-      std::clog << SD_ALERT << "Not booted with systemd" << std::endl;
+      groupgd::safe_journal(SD_ALERT, "Not booted with systemd");
       std::exit(EXIT_FAILURE);
     }
 
@@ -42,7 +43,7 @@ main()
     }
   catch (std::exception& e)
     {
-      std::clog << SD_CRIT << e.what() << std::endl;
+      groupgd::safe_journal(SD_CRIT, e.what());
       std::exit(EXIT_FAILURE);
     }
 }

@@ -49,7 +49,7 @@ Connection::~Connection()
   }
   catch (boost::system::system_error& e)
   {
-    std::clog << SD_ERR << e.what() << std::endl;
+    safe_journal(SD_ERR, e.what());
   }
 }
 
@@ -73,12 +73,11 @@ Connection::on_read_completed(const boost::system::error_code& ec)
       else if (query.find("ADD NETWORK") == 0)
         async_add_network_to_database(query);
       else
-        std::clog << SD_WARNING << "Unexpected query: " << query << std::endl;
+        safe_journal(SD_WARNING, std::string("Unexpected query: ") + query);
     }
   else if (ec == boost::asio::error::eof)
     {
-      std::clog << SD_WARNING
-          << "Client politely disconnected before sending request" << std::endl;
+      safe_journal(SD_WARNING, "Client disconnected before sending request");
     }
   else if (ec != boost::asio::error::operation_aborted)
     {

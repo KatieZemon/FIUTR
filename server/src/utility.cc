@@ -22,6 +22,7 @@
 #include "utility.h"
 
 #include <iostream>
+#include <mutex>
 
 namespace groupgd {
 
@@ -35,6 +36,14 @@ read_line_from_streambuf(std::streambuf* streambuf)
   if (response.length() > 0)
     response.resize(response.length() - 1);
   return response;
+}
+
+void
+safe_journal(const char* priority, std::string message)
+{
+  static std::mutex mutex;
+  std::lock_guard<std::mutex> lock{mutex};
+  std::clog << priority << message << std::endl;
 }
 
 }
