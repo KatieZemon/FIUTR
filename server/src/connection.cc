@@ -62,18 +62,6 @@ Connection::async_await_client_query()
                                           std::placeholders::_1));
 }
 
-boost::asio::ip::tcp::socket*
-Connection::mutable_socket() noexcept
-{
-  return &socket_;
-}
-
-const boost::asio::ip::tcp::socket&
-Connection::socket() const noexcept
-{
-  return socket_;
-}
-
 void
 Connection::on_read_completed(const boost::system::error_code& ec)
 {

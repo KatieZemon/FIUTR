@@ -40,10 +40,10 @@ public:
   async_await_client_query();
 
   boost::asio::ip::tcp::socket*
-  mutable_socket() noexcept;
+  mutable_socket() noexcept { return &socket_; }
 
   const boost::asio::ip::tcp::socket&
-  socket() const noexcept;
+  socket() const noexcept { return socket_; }
 
 private:
   void
