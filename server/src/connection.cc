@@ -54,13 +54,10 @@ Connection::~Connection()
 void
 Connection::async_run()
 {
-  send_networks_to_client();
-  /* FIXME
   boost::asio::async_read_until(socket_, streambuf_, "\r\n",
                                 std::bind(&Connection::handle_read,
                                           shared_from_this(),
                                           std::placeholders::_1));
-                                          */
 }
 
 boost::asio::ip::tcp::socket*
@@ -85,6 +82,11 @@ Connection::handle_read(const boost::system::error_code& ec)
       std::clog << SD_DEBUG << "Client says: " << query << std::endl;
       send_networks_to_client();
     }
+  else if (ec == boost::asio::error::eof)
+    {
+      std::clog << SD_WARNING
+          << "Client politely disconnected before sending request" << std::endl;
+    }
   else if (ec != boost::asio::error::operation_aborted)
     {
       throw boost::system::system_error{ec};
@@ -102,7 +104,7 @@ Connection::send_networks_to_client()
 {
   // TODO do something realistic here
   auto response = std::string{"Hi there client\r\n"};
-  boost::asio::write(socket_, boost::asio::buffer(response));
+  boost::asio::write(socket_, boost::asio::buffer(response), boost::asio::transfer_all());
 }
 
 }

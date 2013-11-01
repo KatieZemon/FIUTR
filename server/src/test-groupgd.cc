@@ -71,6 +71,8 @@ BOOST_FIXTURE_TEST_SUITE(groupgd, Fixture)
 
 BOOST_AUTO_TEST_CASE(temp_stupid_test)
 {
+  auto query = std::string{"Hi from test client, Mr. Server\r\n"};
+  boost::asio::write(socket_, boost::asio::buffer(query), boost::asio::transfer_all());
   boost::test_tools::output_test_stream output;
   output << get_response(&socket_);
   BOOST_CHECK(output.is_equal("Hi there client", false));
