@@ -104,13 +104,12 @@ ConnectionManager::ConnectionManager()
   acceptor_.assign(boost::asio::ip::tcp::v4(), SD_LISTEN_FDS_START);
 }
 
-
 void
 ConnectionManager::accept_initial_connection()
 {
   auto connection = std::make_shared<Connection>(&connection_io_service_);
   acceptor_.accept(*(connection->mutable_socket()));
-  connection->async_run();
+  connection->async_await_client_query();
 }
 
 void
@@ -120,7 +119,7 @@ ConnectionManager::async_accept_additional_connections()
   acceptor_.async_accept(*(connection->mutable_socket()),
                          [=](const boost::system::error_code& ec) {
                            if (!ec)
-                             connection->async_run();
+                             connection->async_await_client_query();
                            else if (ec != boost::asio::error::operation_aborted)
                              throw boost::system::system_error{ec};
                            async_accept_additional_connections();

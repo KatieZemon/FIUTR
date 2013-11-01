@@ -37,7 +37,7 @@ public:
   ~Connection();
 
   void
-  async_run();
+  async_await_client_query();
 
   boost::asio::ip::tcp::socket*
   mutable_socket() noexcept;
@@ -47,13 +47,16 @@ public:
 
 private:
   void
-  handle_read(const boost::system::error_code& ec);
-  
-  void
-  add_network_to_database(std::string query);
+  on_read_completed(const boost::system::error_code& ec);
 
   void
-  send_networks_to_client();
+  on_write_completed(const boost::system::error_code& ec, std::size_t);
+  
+  void
+  async_add_network_to_database(std::string query);
+
+  void
+  async_send_networks_to_client();
 
   boost::asio::ip::tcp::socket socket_;
   boost::asio::streambuf streambuf_;

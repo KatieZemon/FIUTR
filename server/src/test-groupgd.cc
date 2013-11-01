@@ -69,13 +69,19 @@ Fixture::get_response(boost::asio::ip::tcp::socket* socket)
 
 BOOST_FIXTURE_TEST_SUITE(groupgd, Fixture)
 
-BOOST_AUTO_TEST_CASE(temp_stupid_test)
+BOOST_AUTO_TEST_CASE(get_networks)
 {
-  auto query = std::string{"Hi from test client, Mr. Server\r\n"};
-  boost::asio::write(socket_, boost::asio::buffer(query), boost::asio::transfer_all());
+  auto query = std::string{"GET NETWORKS\r\n"};
+  boost::asio::write(socket_, boost::asio::buffer(query));
   boost::test_tools::output_test_stream output;
   output << get_response(&socket_);
-  BOOST_CHECK(output.is_equal("Hi there client", false));
+  BOOST_CHECK(output.is_equal("I've got no networks for you yet.", false));
+}
+
+BOOST_AUTO_TEST_CASE(add_valid_network)
+{
+  auto query = std::string{"ADD NETWORK freedm-cluster 111.111111 99 4.\r\n"};
+  boost::asio::write(socket_, boost::asio::buffer(query));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

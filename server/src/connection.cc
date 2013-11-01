@@ -52,10 +52,10 @@ Connection::~Connection()
 }
 
 void
-Connection::async_run()
+Connection::async_await_client_query()
 {
   boost::asio::async_read_until(socket_, streambuf_, "\r\n",
-                                std::bind(&Connection::handle_read,
+                                std::bind(&Connection::on_read_completed,
                                           shared_from_this(),
                                           std::placeholders::_1));
 }
@@ -73,14 +73,17 @@ Connection::socket() const noexcept
 }
 
 void
-Connection::handle_read(const boost::system::error_code& ec)
+Connection::on_read_completed(const boost::system::error_code& ec)
 {
   if (!ec)
     {
       auto query = read_line_from_streambuf(&streambuf_);
-      // TODO do something realistic with the query
-      std::clog << SD_DEBUG << "Client says: " << query << std::endl;
-      send_networks_to_client();
+      if (query == "GET NETWORKS")
+        async_send_networks_to_client();
+      else if (query.find("ADD NETWORK") == 0)
+        async_add_network_to_database(query);
+      else
+        std::clog << SD_WARNING << "Unexpected query: " << query << std::endl;
     }
   else if (ec == boost::asio::error::eof)
     {
@@ -94,17 +97,37 @@ Connection::handle_read(const boost::system::error_code& ec)
 }
 
 void
-Connection::add_network_to_database(std::string query)
+Connection::on_write_completed(const boost::system::error_code& ec,
+                               std::size_t /*bytes_transferred*/)
 {
-  // TODO
+  if (!ec)
+    {
+      async_await_client_query();
+    }
+  else if (ec != boost::asio::error::operation_aborted)
+    {
+      throw boost::system::system_error{ec};
+    }
 }
 
 void
-Connection::send_networks_to_client()
+Connection::async_add_network_to_database(std::string query)
 {
-  // TODO do something realistic here
-  auto response = std::string{"Hi there client\r\n"};
-  boost::asio::write(socket_, boost::asio::buffer(response), boost::asio::transfer_all());
+  // TODO implement
+  async_await_client_query();
+}
+
+void
+Connection::async_send_networks_to_client()
+{
+  // TODO implement
+  auto response = std::string{"I've got no networks for you yet.\r\n"};
+  boost::asio::async_write(socket_,
+                           boost::asio::buffer(response),
+                           std::bind(&Connection::on_write_completed,
+                                     shared_from_this(),
+                                     std::placeholders::_1,
+                                     std::placeholders::_2));
 }
 
 }
