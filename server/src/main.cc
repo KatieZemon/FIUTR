@@ -20,7 +20,6 @@
  */
 
 #include <cstdlib>
-#include <iostream>
 #include <stdexcept>
 
 #include <systemd/sd-daemon.h>
