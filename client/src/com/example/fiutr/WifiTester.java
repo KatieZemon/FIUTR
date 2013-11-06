@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +29,12 @@ public class WifiTester extends Activity {
        super.onCreate(savedInstanceState);
        
        setContentView(R.layout.activity_wifi);
+       
+       if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
+       {
+    	   getActionBar().setDisplayHomeAsUpEnabled(true);
+       }
+       
        mainText = (TextView) findViewById(R.id.mainText);
        
        // Initiate wifi service manager
@@ -51,6 +58,17 @@ public class WifiTester extends Activity {
        registerReceiver(receiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
        mainWifi.startScan();
        mainText.setText("Starting Scan...");
+    }
+    
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+    	switch(item.getItemId()) {
+    	case android.R.id.home:
+    			Intent intent = new Intent(this, MainActivity.class);
+    			startActivity(intent);
+    			return true;
+    	}
+    	return super.onOptionsItemSelected(item);
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -93,7 +111,7 @@ public class WifiTester extends Activity {
                 sb.append("\n\n");
             }
             
-            mainText.setText(sb);  
+            mainText.setText(sb);
         }
         
     }

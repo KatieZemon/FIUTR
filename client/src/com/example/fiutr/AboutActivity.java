@@ -24,7 +24,7 @@ public class AboutActivity extends Activity {
 		switch (item.getItemId()) {
 		case android.R.id.home:
 			// NavUtils.navigateUpFromSameTask(this);
-			Intent intent = new Intent(this, WifiTester.class);
+			Intent intent = new Intent(this, MainActivity.class);
 			startActivity(intent);
 			return true;
 		}

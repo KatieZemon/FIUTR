@@ -5,16 +5,30 @@ import android.app.Activity;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.google.android.gms.maps.*;
+
 
 public class MainActivity extends Activity {
 
+	private GoogleMap googleMap;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Intent intent;
-		intent = new Intent(this, WifiTester.class);
-		startActivity(intent);
+	//	Intent intent;
+		//intent = new Intent(this, MainActivity.class);
+		//startActivity(intent);
+		try
+		{
+			initializeMap();
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	@Override
@@ -49,6 +63,24 @@ public class MainActivity extends Activity {
 			return super.onOptionsItemSelected(item);
 		}
 
+	}
+	private void initializeMap()
+	{
+		if(googleMap == null)
+		{
+			googleMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+		}
+		if(googleMap == null)
+		{
+			Toast.makeText(getApplicationContext(), "Unable to create maps!", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	@Override
+	protected void onResume()
+	{
+		super.onResume();
+		initializeMap();
 	}
 
 }
