@@ -92,11 +92,8 @@ Connection::on_read_completed(const boost::system::error_code& ec)
       else
         safe_journal(SD_WARNING, std::string("Unexpected query: ") + query);
     }
-  else if (ec == boost::asio::error::eof)
-    {
-      safe_journal(SD_WARNING, "Client disconnected before sending request");
-    }
-  else if (ec != boost::asio::error::operation_aborted)
+  else if (ec != boost::asio::error::operation_aborted
+           && ec != boost::asio::error::eof)
     {
       throw boost::system::system_error{ec};
     }
