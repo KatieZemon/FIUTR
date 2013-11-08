@@ -1,5 +1,5 @@
 [Service]
-ExecStart=/usr/local/bin/groupgd
+ExecStart=@bindir@/groupgd
 
 [Install]
 WantedBy=multi-user.target
