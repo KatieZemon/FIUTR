@@ -18,7 +18,7 @@ AC_PROG_INSTALL
 PKG_CHECK_MODULES(GROUPGD, [libsystemd-daemon])
 
 BOOST_REQUIRE([1.53], [
-	AC_MSG_ERROR([Boost is required])
+  AC_MSG_ERROR([Boost is required])
 ])
 BOOST_DATE_TIME
 BOOST_SYSTEM
@@ -33,8 +33,8 @@ AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 # Checks for library functions.
 
 AC_CONFIG_FILES([
-Makefile
-data/Makefile
-src/Makefile
+  Makefile
+  data/Makefile
+  src/Makefile
 ])
 AC_OUTPUT
