@@ -49,6 +49,11 @@ public:
   socket() const noexcept { return socket_; }
 
 private:
+  Connection(const Connection&) = delete;
+
+  Connection&
+  operator=(const Connection&) = delete;
+
   void
   async_await_client_query();
 

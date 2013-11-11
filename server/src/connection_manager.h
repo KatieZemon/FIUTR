@@ -44,6 +44,11 @@ public:
 private:
   ConnectionManager();
 
+  ConnectionManager(const Connection&) = delete;
+
+  ConnectionManager&
+  operator=(const ConnectionManager&) = delete;
+
   void
   accept_initial_connection();
   
