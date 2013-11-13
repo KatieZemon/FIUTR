@@ -22,6 +22,8 @@
 #include "connection.h"
 
 #include <functional>
+#include <sstream>
+#include <string>
 
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
@@ -32,7 +34,7 @@
 
 namespace groupgd {
 
-Connection::Connection(boost::asio::io_service* io_service) noexcept
+Connection::Connection(boost::asio::io_service* io_service)
 : deadline_timer_(*io_service), socket_(*io_service)
 { }
 
@@ -116,7 +118,21 @@ Connection::on_write_completed(const boost::system::error_code& ec,
 void
 Connection::async_add_network_to_database(std::string query)
 {
-  // TODO implement
+  // TODO not very async
+  // TODO handle absurd values
+  std::istringstream iss{query};
+  // Discard the command ADD NETWORK
+  std::string trash;
+  iss >> trash >> trash;
+  std::string name;
+  iss >> name;
+  float lat = 0.0f;
+  iss >> lat;
+  float lon = 0.0f;
+  iss >> lon;
+  float strength = 0.0f;
+  iss >> strength;
+  database_.add_network(name, lat, lon, strength);
   async_await_client_query();
 }
 

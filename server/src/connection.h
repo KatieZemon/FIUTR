@@ -23,10 +23,13 @@
 #define GROUPGD_CONNECTION_H_
 
 #include <memory>
+#include <string>
 
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/streambuf.hpp>
+
+#include "database.h"
 
 namespace groupgd {
 
@@ -35,7 +38,7 @@ const auto TIMEOUT = boost::posix_time::seconds{30};
 class Connection : public std::enable_shared_from_this<Connection>
 {
 public:
-  Connection(boost::asio::io_service* io_service) noexcept;
+  Connection(boost::asio::io_service* io_service);
 
   ~Connection();
 
@@ -78,6 +81,7 @@ private:
   boost::asio::deadline_timer deadline_timer_;
   boost::asio::ip::tcp::socket socket_;
   boost::asio::streambuf streambuf_;
+  Database database_;
 };
 
 }

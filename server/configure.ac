@@ -15,7 +15,10 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 
 # Checks for libraries.
-PKG_CHECK_MODULES(GROUPGD, [libsystemd-daemon])
+PKG_CHECK_MODULES(GROUPGD, [
+  libsystemd-daemon
+  sqlite3 >= 3.3
+])
 
 BOOST_REQUIRE([1.53], [
   AC_MSG_ERROR([Boost is required])

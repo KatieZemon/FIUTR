@@ -20,9 +20,9 @@ fi
 autoreconf --force --install --verbose
 
 echo
-echo "========================================================================"
+echo "=========================================================================="
 echo "Now you can call ./configure. For a good development configuration, try"
 echo
-echo "./configure CXXFLAGS='-Wall -Wextra -pedantic -O0 -g'"
-echo "========================================================================"
+echo "./configure CXXFLAGS='-Wall -Wextra -pedantic -O0 -g' --localstatedir=/var"
+echo "=========================================================================="
 echo
