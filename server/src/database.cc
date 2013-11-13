@@ -46,6 +46,7 @@ Database::Database()
   catch (std::exception& e)
     {
       sqlite3_close(db_);
+      safe_journal(SD_ERR, std::string{"Can't close: "} + sqlite3_errmsg(db_));
       throw;
     }
 }
