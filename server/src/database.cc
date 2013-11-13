@@ -100,7 +100,7 @@ Database::add_network(std::string name, float lat, float lon, float strength)
 
 Database::~Database()
 {
-  if (sqlite3_close(db_))
+  if (sqlite3_close(db_) != SQLITE_OK)
     safe_journal(SD_ERR,
                  std::string{"Error closing database: "} + sqlite3_errmsg(db_));
 }
