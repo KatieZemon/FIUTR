@@ -22,8 +22,8 @@
 #include "database.h"
 
 #include <errno.h>
-#include <string.h>
 #include <sys/stat.h>
+#include <cstring>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -55,7 +55,8 @@ void
 Database::open_database()
 {
   if (mkdir(LOCALSTATEDIR "/groupgd/", 0755) && errno != EEXIST)
-    throw std::runtime_error{std::string{"Can't mkdir: "} + strerror(errno)};
+    throw std::runtime_error{std::string{"Can't mkdir: "}
+                             + std::strerror(errno)};
 
   if (sqlite3_open(LOCALSTATEDIR "/groupgd/networks.db", &db_) != SQLITE_OK)
     {
