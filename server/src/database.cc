@@ -90,7 +90,8 @@ Database::add_network(std::string name, float lat, float lon, float strength)
   oss << "INSERT INTO Networks VALUES ('" << name << "', "
       << lat << ", " << lon << ", " << strength << ");";
   char* errmsg = nullptr;
-  if (sqlite3_exec(db_, oss.str().c_str(), NULL, NULL, &errmsg) != SQLITE_OK)
+  if (sqlite3_exec(db_, oss.str().c_str(),
+                   nullptr, nullptr, &errmsg) != SQLITE_OK)
     {
       std::string reason{errmsg};
       sqlite3_free(errmsg);
