@@ -19,20 +19,21 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+#include <cstdlib>
 #include <stdexcept>
 
 #include <systemd/sd-daemon.h>
 
 #include "connection_manager.h"
+#include "utility.h"
 
 int
 main()
 {
   if (sd_booted() <= 0)
     {
-      std::clog << SD_ALERT << "Not booted with systemd" << std::endl;
-      std::exit(1);
+      groupgd::safe_journal(SD_ALERT, "Not booted with systemd");
+      std::exit(EXIT_FAILURE);
     }
 
   try
@@ -41,7 +42,7 @@ main()
     }
   catch (std::exception& e)
     {
-      std::clog << SD_CRIT << e.what() << std::endl;
-      std::exit(1);
+      groupgd::safe_journal(SD_CRIT, e.what());
+      std::exit(EXIT_FAILURE);
     }
 }

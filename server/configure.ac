@@ -11,19 +11,19 @@ LT_PREREQ([2.4])
 LT_INIT([disable-static])
 
 # Checks for programs.
-AC_PROG_AWK
-AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_INSTALL
-AC_PROG_LN_S
-AC_PROG_MAKE_SET
 
 # Checks for libraries.
-PKG_CHECK_MODULES(GROUPGD, [libsystemd-daemon])
+PKG_CHECK_MODULES(GROUPGD, [
+  libsystemd-daemon
+  sqlite3 >= 3.3
+])
 
 BOOST_REQUIRE([1.53], [
-	AC_MSG_ERROR([Boost is required])
+  AC_MSG_ERROR([Boost is required])
 ])
+BOOST_DATE_TIME
 BOOST_SYSTEM
 BOOST_TEST
 
@@ -36,8 +36,8 @@ AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
 # Checks for library functions.
 
 AC_CONFIG_FILES([
-Makefile
-data/Makefile
-src/Makefile
+  Makefile
+  data/Makefile
+  src/Makefile
 ])
 AC_OUTPUT

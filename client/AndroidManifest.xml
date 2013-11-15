@@ -4,23 +4,41 @@
     android:versionCode="1"
     android:versionName="1.0" >
 
+    <permission
+        android:name="com.example.fiutr.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
+    
+    <uses-permission android:name="com.example.fiutr.permission.MAPS_RECEIVE"/>
+    
     <uses-sdk
-        android:minSdkVersion="8"
-        android:targetSdkVersion="18" />
+        android:minSdkVersion="11"
+        android:targetSdkVersion="19" />
+    
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+    
 	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 	<uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+	<uses-permission android:name="android.permission.INTERNET" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	<uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+	<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+	<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 	
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+        
         <activity
             android:name="com.example.fiutr.WifiTester"
             android:label="@string/app_name" >
               <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.fuitr.MainActivity" />
+                android:value="com.example.fiutr.MainActivity" />
         </activity>
         <activity
             android:name="com.example.fiutr.MainActivity"
@@ -37,7 +55,7 @@
             android:parentActivityName="com.example.fiutr.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.fuitr.MainActivity" />
+                android:value="com.example.fiutr.MainActivity" />
         </activity>
         <activity
             android:name="com.example.fiutr.ScanActivity"
@@ -45,7 +63,7 @@
             android:parentActivityName="com.example.fiutr.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.fuitr.MainActivity" />
+                android:value="com.example.fiutr.MainActivity" />
         </activity>
         <activity
             android:name="com.example.fiutr.ViewAllActivity"
@@ -53,7 +71,7 @@
             android:parentActivityName="com.example.fiutr.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.fuitr.MainActivity" />
+                android:value="com.example.fiutr.MainActivity" />
         </activity>
         <activity
             android:name="com.example.fiutr.AboutActivity"
@@ -61,8 +79,15 @@
             android:parentActivityName="com.example.fiutr.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.example.fuitr.MainActivity" />
+                android:value="com.example.fiutr.MainActivity" />
         </activity>
+        <meta-data
+            
+                android:name="com.google.android.gms.version"
+                android:value="@integer/google_play_services_version" />
+        <meta-data
+                android:name="com.google.android.maps.v2.API_KEY"
+                android:value="AIzaSyCAVZPOpuk_1cwRjhWbRtnWsa9XElcT3T4" />
     </application>
 
 </manifest>

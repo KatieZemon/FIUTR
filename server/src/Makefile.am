@@ -2,16 +2,19 @@ bin_PROGRAMS = groupgd
 
 groupgd_CPPFLAGS = \
 	$(BOOST_CPPFLAGS) \
-	$(GROUPGD_CPPFLAGS)
+	$(GROUPGD_CPPFLAGS) \
+	-DLOCALSTATEDIR=\"$(localstatedir)\"
 
 groupgd_CXXFLAGS = \
 	$(GROUPGD_CXXFLAGS)
 
 groupgd_LDADD = \
+	$(BOOST_DATE_TIME_LIBS) \
 	$(BOOST_SYSTEM_LIBS) \
 	$(GROUPGD_LIBS)
 
 groupgd_LDFLAGS = \
+	$(BOOST_DATE_TIME_LDFLAGS) \
 	$(BOOST_SYSTEM_LDFLAGS) \
 	$(GROUPGD_LDFLAGS)
 
@@ -21,6 +24,8 @@ groupgd_SOURCES = \
 	connection.cc \
 	connection_manager.h \
 	connection_manager.cc \
+	database.h \
+	database.cc \
 	utility.h \
 	utility.cc
 

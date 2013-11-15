@@ -21,69 +21,93 @@
 
 #include "connection.h"
 
-#include <iostream>
+#include <functional>
+#include <sstream>
+#include <string>
 
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
+#include <boost/system/system_error.hpp>
 #include <systemd/sd-daemon.h>
 
 #include "utility.h"
 
 namespace groupgd {
 
-Connection::Connection(boost::asio::io_service* io_service) noexcept
-: socket_(*io_service)
+Connection::Connection(boost::asio::io_service* io_service)
+: deadline_timer_(*io_service), socket_(*io_service)
 { }
 
 Connection::~Connection()
 {
   try
   {
-    if (socket_.is_open())
-      {
-        socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-        socket_.close();
-      }
+    stop();
   }
   catch (boost::system::system_error& e)
   {
-    std::clog << SD_ERR << e.what() << std::endl;
+    safe_journal(SD_ERR, e.what());
   }
 }
 
 void
 Connection::async_run()
 {
-  send_networks_to_client();
-  /* FIXME
-  boost::asio::async_read_until(socket_, streambuf_, "\r\n",
-                                std::bind(&Connection::handle_read,
-                                          shared_from_this(),
-                                          std::placeholders::_1));
-                                          */
-}
-
-boost::asio::ip::tcp::socket*
-Connection::mutable_socket() noexcept
-{
-  return &socket_;
-}
-
-const boost::asio::ip::tcp::socket&
-Connection::socket() const noexcept
-{
-  return socket_;
+  deadline_timer_.async_wait(std::bind(&Connection::on_deadline_timer_expired,
+                                       shared_from_this()));
+  async_await_client_query();
 }
 
 void
-Connection::handle_read(const boost::system::error_code& ec)
+Connection::async_await_client_query()
+{
+  deadline_timer_.expires_from_now(TIMEOUT);
+  boost::asio::async_read_until(socket_, streambuf_, "\r\n",
+                                std::bind(&Connection::on_read_completed,
+                                          shared_from_this(),
+                                          std::placeholders::_1));
+}
+
+void
+Connection::on_deadline_timer_expired()
+{
+  // Timed operation could have completed after the timer expired, yet before
+  // this function was called. In that case, keep the connection open.
+  if (deadline_timer_.expires_at()
+        <= boost::asio::deadline_timer::traits_type::now())
+    stop();
+  else
+    deadline_timer_.async_wait(std::bind(&Connection::on_deadline_timer_expired,
+                                         shared_from_this()));
+}
+
+void
+Connection::on_read_completed(const boost::system::error_code& ec)
 {
   if (!ec)
     {
       auto query = read_line_from_streambuf(&streambuf_);
-      // TODO do something realistic with the query
-      std::clog << SD_DEBUG << "Client says: " << query << std::endl;
-      send_networks_to_client();
+      if (query == "GET NETWORKS")
+        async_send_networks_to_client();
+      else if (query.find("ADD NETWORK") == 0)
+        async_add_network_to_database(query);
+      else
+        safe_journal(SD_WARNING, std::string("Unexpected query: ") + query);
+    }
+  else if (ec != boost::asio::error::operation_aborted
+           && ec != boost::asio::error::eof)
+    {
+      throw boost::system::system_error{ec};
+    }
+}
+
+void
+Connection::on_write_completed(const boost::system::error_code& ec,
+                               std::size_t /*bytes_transferred*/)
+{
+  if (!ec)
+    {
+      async_await_client_query();
     }
   else if (ec != boost::asio::error::operation_aborted)
     {
@@ -92,17 +116,50 @@ Connection::handle_read(const boost::system::error_code& ec)
 }
 
 void
-Connection::add_network_to_database(std::string query)
+Connection::async_add_network_to_database(std::string query)
 {
-  // TODO
+  // TODO not very async
+  // TODO handle absurd values
+  std::istringstream iss{query};
+  // Discard the command ADD NETWORK
+  std::string trash;
+  iss >> trash >> trash;
+  std::string name;
+  iss >> name;
+  float lat = 0.0f;
+  iss >> lat;
+  float lon = 0.0f;
+  iss >> lon;
+  float strength = 0.0f;
+  iss >> strength;
+  database_.add_network(name, lat, lon, strength);
+  async_await_client_query();
 }
 
 void
-Connection::send_networks_to_client()
+Connection::async_send_networks_to_client()
 {
-  // TODO do something realistic here
-  auto response = std::string{"Hi there client\r\n"};
-  boost::asio::write(socket_, boost::asio::buffer(response));
+  // TODO implement
+  deadline_timer_.expires_from_now(TIMEOUT);
+  auto response = std::string{"I've got no networks for you yet.\r\n"};
+  boost::asio::async_write(socket_,
+                           boost::asio::buffer(response),
+                           std::bind(&Connection::on_write_completed,
+                                     shared_from_this(),
+                                     std::placeholders::_1,
+                                     std::placeholders::_2));
+}
+
+void
+Connection::stop()
+{
+  deadline_timer_.cancel();
+
+  if (socket_.is_open())
+    {
+      socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+      socket_.close();
+    }
 }
 
 }

@@ -1,6 +1,6 @@
 /* -*- indent-tabs-mode: nil; c-basic-offset: 2; tab-width: 2 -*-  */
 /*
- * utility.h
+ * database.h
  * Copyright (C) 2013 Michael Catanzaro <michael.catanzaro@mst.edu>
  *
  * This file is part of groupgd.
@@ -19,31 +19,40 @@
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "utility.h"
+#ifndef GROUPGD_DATABASE_H_
+#define GROUPGD_DATABASE_H_
 
-#include <iostream>
-#include <mutex>
+#include <string>
+
+class sqlite3;
 
 namespace groupgd {
 
-std::string
-read_line_from_streambuf(std::streambuf* streambuf)
+class Database
 {
-  std::istream is{streambuf};
-  auto response = std::string{};
-  std::getline(is, response);
-  // Prune delimiter
-  if (response.length() > 0)
-    response.resize(response.length() - 1);
-  return response;
+public:
+  Database();
+
+  ~Database();
+
+  void
+  add_network(std::string name, float lat, float lon, float strength);
+
+private:
+  Database(const Database&) = delete;
+
+  Database&
+  operator=(const Database&) = delete;
+
+  void
+  open_database();
+
+  void
+  ensure_network_table_exists();
+
+  sqlite3* db_;
+};
+
 }
 
-void
-safe_journal(const char* priority, std::string message)
-{
-  static std::mutex mutex;
-  std::lock_guard<std::mutex> lock{mutex};
-  std::clog << priority << message << std::endl;
-}
-
-}
+#endif

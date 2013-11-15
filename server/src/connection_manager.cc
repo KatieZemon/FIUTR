@@ -22,17 +22,19 @@
 #include "connection_manager.h"
 
 #include <cassert>
+#include <cstdlib>
 #include <functional>
-#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <thread>
 
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
+#include <boost/system/system_error.hpp>
 #include <systemd/sd-daemon.h>
 
 #include "connection.h"
+#include "utility.h"
 
 namespace groupgd {
 
@@ -66,7 +68,8 @@ ConnectionManager::run()
                                  catch (std::exception& e)
                                  {
                                    connection_io_service_.stop();
-                                   std::clog << SD_ERR << e.what() << std::endl;
+                                   exit_status_ = EXIT_FAILURE;
+                                   safe_journal(SD_CRIT, e.what());
                                  }
                                }};
 
@@ -90,6 +93,9 @@ ConnectionManager::run()
 
   if (rethrow_signal_)
     std::raise(rethrow_signal_);
+  
+  if (exit_status_)
+    std::exit(exit_status_);
 }
 
 ConnectionManager::ConnectionManager()
@@ -103,7 +109,6 @@ ConnectionManager::ConnectionManager()
 
   acceptor_.assign(boost::asio::ip::tcp::v4(), SD_LISTEN_FDS_START);
 }
-
 
 void
 ConnectionManager::accept_initial_connection()

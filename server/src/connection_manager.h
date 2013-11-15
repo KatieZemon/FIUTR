@@ -44,6 +44,11 @@ public:
 private:
   ConnectionManager();
 
+  ConnectionManager(const Connection&) = delete;
+
+  ConnectionManager&
+  operator=(const ConnectionManager&) = delete;
+
   void
   accept_initial_connection();
   
@@ -57,6 +62,7 @@ private:
   boost::asio::io_service acceptor_io_service_;
   boost::asio::ip::tcp::acceptor acceptor_;
   boost::asio::signal_set signal_set_;
+  int exit_status_ = 0;
   int rethrow_signal_ = 0;
 };
 
