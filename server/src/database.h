@@ -24,6 +24,8 @@
 
 #include <string>
 
+#include <boost/property_tree/ptree.hpp>
+
 class sqlite3;
 
 namespace groupgd {
@@ -37,6 +39,9 @@ public:
 
   void
   add_network(std::string name, float lat, float lon, float strength);
+
+  boost::property_tree::ptree
+  all_networks() const;
 
 private:
   Database(const Database&) = delete;
