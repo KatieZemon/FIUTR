@@ -97,7 +97,7 @@ Database::add_network(std::string name, float lat, float lon, float strength)
       sqlite3_free(errmsg);
       throw std::runtime_error{"Can't insert: " + reason};
     }
-  safe_journal(SD_DEBUG, std::string{"Executed query "} + oss.str());
+  safe_journal(SD_DEBUG, "Executed query " + oss.str());
 }
 
 Database::~Database()
