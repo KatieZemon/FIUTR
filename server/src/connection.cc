@@ -88,6 +88,8 @@ Connection::on_read_completed(const boost::system::error_code& ec)
   if (!ec)
     {
       auto query = read_line_from_streambuf(&streambuf_);
+      // These operations are themselves responsible for calling
+      // async_await_client_query when they are finished.
       if (query == "GET NETWORKS")
         async_send_networks_to_client();
       else if (query.find("ADD NETWORK") == 0)
