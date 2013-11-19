@@ -29,6 +29,7 @@ BOOST_TEST
 
 # Checks for header files.
 BOOST_ASIO
+BOOST_PROPERTY_TREE
 
 # Checks for typedefs, structures, and compiler characteristics.
 AX_CXX_COMPILE_STDCXX_11([noext], [mandatory])
