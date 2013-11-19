@@ -1,0 +1,14 @@
+groupgd - system daemon for the Mighty Group G server
+
+Dependencies: Boost, SQLite, systemd
+
+To install from a tarball:
+
+./configure
+make
+sudo make install
+sudo systemctl enable groupgd.socket
+
+If you're working from git, you need to run ./autogen.sh to generate configure.
+
+Socket activation is required, so do not enable groupgd.service.
