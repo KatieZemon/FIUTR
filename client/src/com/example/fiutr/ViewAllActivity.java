@@ -10,6 +10,7 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
+import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -34,9 +35,7 @@ public class ViewAllActivity extends PreferenceActivity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			// NavUtils.navigateUpFromSameTask(this);
-			Intent intent = new Intent(this, MainActivity.class);
-			startActivity(intent);
+			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		}
 
