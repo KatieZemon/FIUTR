@@ -26,6 +26,7 @@
 #include <string>
 
 #include <boost/asio.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 #include <boost/system/error_code.hpp>
 #include <boost/system/system_error.hpp>
 #include <systemd/sd-daemon.h>
@@ -87,6 +88,8 @@ Connection::on_read_completed(const boost::system::error_code& ec)
   if (!ec)
     {
       auto query = read_line_from_streambuf(&streambuf_);
+      // These operations are themselves responsible for calling
+      // async_await_client_query when they are finished.
       if (query == "GET NETWORKS")
         async_send_networks_to_client();
       else if (query.find("ADD NETWORK") == 0)
@@ -139,11 +142,11 @@ Connection::async_add_network_to_database(std::string query)
 void
 Connection::async_send_networks_to_client()
 {
-  // TODO implement
   deadline_timer_.expires_from_now(TIMEOUT);
-  auto response = std::string{"I've got no networks for you yet.\r\n"};
-  boost::asio::async_write(socket_,
-                           boost::asio::buffer(response),
+  auto ptree = database_.all_networks();
+  std::ostream ostream{&streambuf_};
+  boost::property_tree::write_xml(ostream, ptree);
+  boost::asio::async_write(socket_, streambuf_,
                            std::bind(&Connection::on_write_completed,
                                      shared_from_this(),
                                      std::placeholders::_1,
