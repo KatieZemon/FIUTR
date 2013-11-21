@@ -38,7 +38,7 @@ public:
   ~Database();
 
   void
-  add_network(std::string name, float lat, float lon, float strength);
+  add_network(std::string name, double lat, double lon, float strength);
 
   boost::property_tree::ptree
   all_networks() const;

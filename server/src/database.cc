@@ -85,7 +85,7 @@ Database::ensure_network_table_exists()
 }
 
 void
-Database::add_network(std::string name, float lat, float lon, float strength)
+Database::add_network(std::string name, double lat, double lon, float strength)
 {
   // FIXME what about duplicate networks (also nearby networks?)
   // FIXME should be a prepared statement to prevent injections

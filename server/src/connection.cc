@@ -129,9 +129,9 @@ Connection::async_add_network_to_database(std::string query)
   iss >> trash >> trash;
   std::string name;
   iss >> name;
-  float lat = 0.0f;
+  double lat = 0.0f;
   iss >> lat;
-  float lon = 0.0f;
+  double lon = 0.0f;
   iss >> lon;
   float strength = 0.0f;
   iss >> strength;
