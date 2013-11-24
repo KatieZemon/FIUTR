@@ -5,8 +5,8 @@ dist_noinst_DATA = groupgd.service.in
 systemdsystemunit_DATA = groupgd.service
 dist_systemdsystemunit_DATA = groupgd.socket
 
-groupgd.service:
-	$(AM_V_GEN) sed -e "s|\@bindir\@|$(bindir)|" groupgd.service.in > $@
+groupgd.service: groupgd.service.in
+	$(AM_V_GEN) sed -e "s|\@bindir\@|$(bindir)|" $< > $@.tmp && mv $@.tmp $@
 
 CLEANFILES = groupgd.service
 
