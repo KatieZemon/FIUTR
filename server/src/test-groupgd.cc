@@ -25,6 +25,7 @@
 #include <string>
 
 #include <boost/asio.hpp>
+#include <boost/property_tree/ptree.hpp>
 #include <boost/test/output_test_stream.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -33,55 +34,83 @@
 namespace groupgd {
   namespace test {
 
+static void
+request_networks(boost::asio::ip::tcp::socket* socket)
+{
+  auto query = std::string{"GET NETWORKS\r\n"};
+  boost::asio::write(*socket, boost::asio::buffer(query));
+}
+
+static boost::property_tree::ptree
+receive_networks(boost::asio::ip::tcp::socket* socket)
+{
+  boost::asio::streambuf sb;
+  boost::asio::read_until(*socket, sb, "</networks>");
+  return streambuf_to_ptree(&sb);
+}
+
+static void
+add_network(std::string name, double lat, double lon, float strength,
+            boost::asio::ip::tcp::socket* socket)
+{
+  std::ostringstream oss;
+  oss << "ADD NETWORK " << name << " " << lat
+      << " " << lon << " " << strength << "\r\n";
+  boost::asio::write(*socket, boost::asio::buffer(oss.str()));
+}
+
+static void
+ensure_network_exists(const boost::property_tree::ptree& ptree,
+                      std::string name,
+                      double lat,
+                      double lon,
+                      float strength)
+{
+  for (const auto& pair : ptree.get_child("networks"))
+    {
+      auto network = pair.second;
+      if (network.get<std::string>("name") == name
+          && nearly_equal(network.get<double>("lat"), lat)
+          && nearly_equal(network.get<double>("lon"), lon)
+          && nearly_equal(network.get<float>("strength"), strength))
+        return;
+    }
+  BOOST_ERROR("Valid network not found in database");
+}
+
 struct Fixture
 {
-  Fixture();
-  
-  ~Fixture();
-  
-  std::string
-  get_response(boost::asio::ip::tcp::socket* socket);
-  
+  Fixture()
+  : io_service_(), socket_(io_service_)
+  {
+    socket_.connect(boost::asio::ip::tcp::endpoint(
+            boost::asio::ip::address_v4::from_string("127.0.0.1"), 50000));
+  }
+
+  ~Fixture()
+  {
+    socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
+    socket_.close();
+  }
+
   boost::asio::io_service io_service_;
   boost::asio::ip::tcp::socket socket_;
 };
 
-Fixture::Fixture()
-: io_service_(), socket_(io_service_)
-{
-  socket_.connect(boost::asio::ip::tcp::endpoint(
-          boost::asio::ip::address_v4::from_string("127.0.0.1"), 50000));
-}
-
-Fixture::~Fixture()
-{
-  socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-  socket_.close();
-}
-
-std::string
-Fixture::get_response(boost::asio::ip::tcp::socket* socket)
-{
-  boost::asio::streambuf sb;
-  boost::asio::read_until(*socket, sb, "</networks>");
-  return read_line_from_streambuf(&sb);
-}
-
 BOOST_FIXTURE_TEST_SUITE(groupgd, Fixture)
 
-BOOST_AUTO_TEST_CASE(get_networks)
+BOOST_AUTO_TEST_CASE(get_networks_returns_response)
 {
-  auto query = std::string{"GET NETWORKS\r\n"};
-  boost::asio::write(socket_, boost::asio::buffer(query));
-  boost::test_tools::output_test_stream output;
-  output << get_response(&socket_);
-  BOOST_CHECK(output.is_equal("I've got no networks for you yet.", false));
+  request_networks(&socket_);
+  receive_networks(&socket_);
 }
 
 BOOST_AUTO_TEST_CASE(add_valid_network)
 {
-  auto query = std::string{"ADD NETWORK freedm-cluster 111.111111 99 4.\r\n"};
-  boost::asio::write(socket_, boost::asio::buffer(query));
+  add_network("Test", 135, 34.54, 7, &socket_);
+  request_networks(&socket_);
+  auto ptree = receive_networks(&socket_);
+  ensure_network_exists(ptree, "Test", 135, 34.54, 7);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
