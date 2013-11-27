@@ -94,6 +94,8 @@ Connection::on_read_completed(const boost::system::error_code& ec)
         async_send_networks_to_client();
       else if (query.find("ADD NETWORK") == 0)
         async_add_network_to_database(query);
+      else if (query.find("ERROR") == 0)
+        handle_error_claim(query);
       else
         safe_journal(SD_WARNING, std::string("Unexpected query: ") + query);
     }
@@ -137,6 +139,15 @@ Connection::async_add_network_to_database(std::string query)
   iss >> strength;
   database_.add_network(name, lat, lon, strength);
   async_await_client_query();
+}
+
+void
+Connection::handle_error_claim(std::string query)
+{
+  // Discard the command ERROR
+  query.erase(0, 6);
+  safe_journal(SD_ERR, query);
+  stop();
 }
 
 void

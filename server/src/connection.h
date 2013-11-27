@@ -77,6 +77,9 @@ private:
   async_send_networks_to_client();
 
   void
+  handle_error_claim(std::string query);
+
+  void
   stop();
 
   boost::asio::deadline_timer deadline_timer_;
