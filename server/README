@@ -7,7 +7,6 @@ To install from a tarball:
 ./configure
 make
 sudo make install
-
 sudo systemctl enable groupgd.socket
 
 Some points to consider:
@@ -27,3 +26,4 @@ I don't either, but you can:
 3) Follow the steps above. When running configure, specify --localstatedir=/var
 4) In Fedora, you can use the firewalld GUI to open port 50000.
 5) Profit.
+6) To run the testcases: 'make check' (groupgd must be installed and listening)
