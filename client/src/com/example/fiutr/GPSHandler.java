@@ -1,5 +1,6 @@
 package com.example.fiutr;
 
+import android.app.AlertDialog;
 import android.content.*;
 import android.location.*;
 import android.widget.*;
@@ -17,9 +18,28 @@ public class GPSHandler {
 	{
 		gpsContext = subContext;
 		locMan = (LocationManager) gpsContext.getSystemService(gpsContext.LOCATION_SERVICE);
+		if(!locMan.isProviderEnabled(LocationManager.GPS_PROVIDER))
+		{
+			AlertDialog.Builder builder = new AlertDialog.Builder(gpsContext);
+			builder.setMessage("GPS is disabled. Do you want to enable it?")
+				   .setCancelable(false)
+				   .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+					   public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id)
+					   {
+						   gpsContext.startActivity(new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+					   }
+				   })
+				   .setNegativeButton("No", new DialogInterface.OnClickListener() {
+					   public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id)
+					   {
+						   dialog.cancel();
+					   }
+				   });
+			final AlertDialog alert = builder.create();
+			alert.show();
+		}
 	    gpsCriteria = new Criteria();
 		provider = locMan.getBestProvider(gpsCriteria, false);
-		
 	}
 	
 	public boolean updateLocation()

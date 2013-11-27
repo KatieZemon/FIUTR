@@ -1,5 +1,9 @@
 package com.example.fiutr;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import android.location.*;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
@@ -18,12 +22,16 @@ public class MainActivity extends Activity implements LocationListener{
 	private GoogleMap googleMap;
 	private CameraPosition camPos;
 	private GPSHandler gpsHandler;
+	private WiFiHandler wifiHandler;
+	private final ArrayList<LocationNetwork> wifiGPS = new ArrayList<LocationNetwork>();
+	private final ArrayList<Marker> markerList = new ArrayList<Marker>();
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		gpsHandler = new GPSHandler(this);
+		wifiHandler = new WiFiHandler(this);
 		gpsHandler.updateLocation();
 
 		try
@@ -101,34 +109,64 @@ public class MainActivity extends Activity implements LocationListener{
 	{
 		if(gpsHandler.updateLocation())
 		{
+			removeMarker("Current Location");
 			camPos = new CameraPosition.Builder()
 				.target(new LatLng(gpsHandler.getLat(),gpsHandler.getLon()))
 				.zoom(17)
 				.build();
 			googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos));
 			addMarker("Current Location", new LatLng(gpsHandler.getLat(),gpsHandler.getLon()));
+			processWiFiLocations(wifiHandler.getWifiNetworks(),gpsHandler.getLat(), gpsHandler.getLon());
 		}
 		else
 		{
-			Toast.makeText(this, "Unable to update GPS Position!", Toast.LENGTH_LONG).show();
+			Toast.makeText(this, "Unable to update GPS Position!", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	public void processWiFiLocations(List<ScanResult> wifiNetworks, double latitude, double longitude)
+	{
+		for(ScanResult result : wifiNetworks)
+		{
+			// Check to see if it is already in there. If so, remove it.
+			removeMarker(result.SSID);
+			// Add it to our array of LocationNetworks, and to the map.
+			wifiGPS.add(new LocationNetwork(result, latitude, longitude));
+			addMarker(result, new LatLng(latitude, longitude));
 		}
 	}
 	
 	public void addMarker(String title, LatLng loc)
 	{
-		googleMap.addMarker(new MarkerOptions()
-			.position(loc)
-			.title(title)
-			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+		Marker marker = googleMap.addMarker(new MarkerOptions()
+								 .position(loc)
+								 .title(title)
+								 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)));
+		markerList.add(marker);
 	}
 	
 	public void addMarker(ScanResult result, LatLng loc)
 	{
-		googleMap.addMarker(new MarkerOptions()
-			.position(loc)
-			.title(result.SSID)
-			.snippet(result.toString())
-			.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+		Marker marker = googleMap.addMarker(new MarkerOptions()
+								 .position(loc)
+								 .title(result.SSID)
+								 .snippet(result.toString())
+								 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+		markerList.add(marker);
+		
+	}
+	
+	public void removeMarker(String title)
+	{
+		Iterator<Marker> i = markerList.iterator();
+		while(i.hasNext())
+		{
+			Marker currentItem = i.next();
+			if(currentItem.getTitle().equals(title))
+			{
+				currentItem.remove();
+			}
+		}
 	}
 	
 	@Override
@@ -136,7 +174,7 @@ public class MainActivity extends Activity implements LocationListener{
 	{
 		camPos = new CameraPosition.Builder()
 			.target(new LatLng(location.getLatitude(),location.getLongitude()))
-			.zoom(17)
+			.zoom(15)
 			.build();
 		googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos));
 	}
