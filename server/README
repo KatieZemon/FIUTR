@@ -21,9 +21,10 @@ Some points to consider:
 
 I don't either, but you can:
 
-1) Install Fedora. It has systemd.
-2) sudo yum install boost-devel sqlite-devel systemd-devel
-3) Follow the steps above. When running configure, specify --localstatedir=/var
-4) In Fedora, you can use the firewalld GUI to open port 50000.
-5) Profit.
-6) To run the testcases: 'make check' (groupgd must be installed and listening)
+1) Install Fedora. It's easy and comes with systemd.
+2) sudo yum install @development-libs @development-tools
+3) sudo yum install boost-devel sqlite-devel systemd-devel
+4) Follow the steps above. When running configure, specify --localstatedir=/var
+5) In Fedora, you can use the firewalld GUI to open port 50000.
+6) Profit.
+7) To run the testcases: 'make check' (groupgd must be installed and listening)
