@@ -68,7 +68,8 @@ private:
 
   void
   on_write_completed(const boost::system::error_code& ec, std::size_t);
-  
+
+  // FIXME haha async?
   void
   async_add_network_to_database(std::string query);
 
