@@ -24,6 +24,9 @@
 #include <iostream>
 #include <mutex>
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
 namespace groupgd {
 
 std::string
@@ -51,6 +54,15 @@ read_all_from_streambuf(std::streambuf* streambuf)
       response += temp;
     } while (!temp.empty());
   return response;
+}
+
+boost::property_tree::ptree
+streambuf_to_ptree(std::streambuf* streambuf)
+{
+  std::istream is{streambuf};
+  boost::property_tree::ptree result;
+  boost::property_tree::read_xml(is, result);
+  return result;
 }
 
 void

@@ -25,6 +25,8 @@
 #include <streambuf>
 #include <string>
 
+#include <boost/property_tree/ptree.hpp>
+
 namespace groupgd {
 
 std::string
@@ -32,6 +34,9 @@ read_line_from_streambuf(std::streambuf* streambuf);
 
 std::string
 read_all_from_streambuf(std::streambuf* streambuf);
+
+boost::property_tree::ptree
+streambuf_to_ptree(std::streambuf* streambuf);
 
 void
 safe_journal(const char* priority, std::string message);
