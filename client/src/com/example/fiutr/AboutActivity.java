@@ -27,6 +27,7 @@ public class AboutActivity extends Activity {
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		}
+
 		return super.onOptionsItemSelected(item);
 	}
 }

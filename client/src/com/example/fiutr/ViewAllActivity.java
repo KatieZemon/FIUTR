@@ -1,5 +1,6 @@
 package com.example.fiutr;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -42,6 +43,7 @@ public class ViewAllActivity extends PreferenceActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	@SuppressLint("ValidFragment")
 	public class PrefsFragment extends PreferenceFragment {
 
 		@Override

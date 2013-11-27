@@ -76,6 +76,7 @@ public class SearchActivity extends Activity {
 	}
 	
 	private class SeekBarListener implements SeekBar.OnSeekBarChangeListener {
+
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (seekBar == prefDistSeekbar)
             	prefDistVal.setText(""+progress+ " miles");
@@ -86,7 +87,9 @@ public class SearchActivity extends Activity {
         }
 
         public void onStartTrackingTouch(SeekBar seekBar) {}
+
         public void onStopTrackingTouch(SeekBar seekBar) {}
+
     }
  
 
