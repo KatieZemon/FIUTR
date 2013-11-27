@@ -38,6 +38,21 @@ read_line_from_streambuf(std::streambuf* streambuf)
   return response;
 }
 
+std::string
+read_all_from_streambuf(std::streambuf* streambuf)
+{
+  std::istream is{streambuf};
+  auto response = std::string{};
+  auto temp = std::string{};
+  do
+    {
+      temp.clear();
+      std::getline(is, temp);
+      response += temp;
+    } while (!temp.empty());
+  return response;
+}
+
 void
 safe_journal(const char* priority, std::string message)
 {

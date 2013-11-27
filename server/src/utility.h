@@ -30,6 +30,9 @@ namespace groupgd {
 std::string
 read_line_from_streambuf(std::streambuf* streambuf);
 
+std::string
+read_all_from_streambuf(std::streambuf* streambuf);
+
 void
 safe_journal(const char* priority, std::string message);
 
