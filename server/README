@@ -7,6 +7,7 @@ To install from a tarball:
 ./configure
 make
 sudo make install
+
 sudo systemctl enable groupgd.socket
 
 Some points to consider:
@@ -23,6 +24,6 @@ I don't either, but you can:
 
 1) Install Fedora. It has systemd.
 2) sudo yum install boost-devel sqlite-devel systemd-devel
-3) Follow the steps above.
+3) Follow the steps above. When running configure, specify --localstatedir=/var
 4) In Fedora, you can use the firewalld GUI to open port 50000.
 5) Profit.
