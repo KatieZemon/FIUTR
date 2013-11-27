@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -75,7 +76,6 @@ public class SearchActivity extends Activity {
 	}
 	
 	private class SeekBarListener implements SeekBar.OnSeekBarChangeListener {
-
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (seekBar == prefDistSeekbar)
             	prefDistVal.setText(""+progress+ " miles");
@@ -86,9 +86,7 @@ public class SearchActivity extends Activity {
         }
 
         public void onStartTrackingTouch(SeekBar seekBar) {}
-
         public void onStopTrackingTouch(SeekBar seekBar) {}
-
     }
  
 
@@ -96,10 +94,7 @@ public class SearchActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			//NavUtils.navigateUpFromSameTask(this);
-			finish();
-			//Intent intent = new Intent(this, MainActivity.class);
-			//startActivity(intent);
+			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		}
 

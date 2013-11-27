@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 
 public class AboutActivity extends Activity {
@@ -23,12 +24,9 @@ public class AboutActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
 		case android.R.id.home:
-			// NavUtils.navigateUpFromSameTask(this);
-			Intent intent = new Intent(this, MainActivity.class);
-			startActivity(intent);
+			NavUtils.navigateUpFromSameTask(this);
 			return true;
 		}
-
 		return super.onOptionsItemSelected(item);
 	}
 }

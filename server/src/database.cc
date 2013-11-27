@@ -28,6 +28,7 @@
 #include <stdexcept>
 #include <string>
 
+#include <boost/property_tree/ptree.hpp>
 #include <sqlite3.h>
 #include <systemd/sd-daemon.h>
 
@@ -86,6 +87,7 @@ Database::ensure_network_table_exists()
 void
 Database::add_network(std::string name, float lat, float lon, float strength)
 {
+  // FIXME what about duplicate networks (also nearby networks?)
   // FIXME should be a prepared statement to prevent injections
   std::ostringstream oss;
   oss << "INSERT INTO Networks VALUES ('" << name << "', "
@@ -99,6 +101,48 @@ Database::add_network(std::string name, float lat, float lon, float strength)
       throw std::runtime_error{"Can't insert: " + reason};
     }
   safe_journal(SD_DEBUG, "Executed query " + oss.str());
+}
+
+static int
+process_result_row(void* ptree, int rows,
+                   char** column_text, char** column_name)
+{
+  try
+    {
+      auto all_networks = reinterpret_cast<boost::property_tree::ptree*>(ptree);
+      auto current_network = boost::property_tree::ptree{};
+      for (int i = 0; i < rows; ++i, ++column_text, ++column_name)
+        {
+          current_network.put(*column_name, *column_text);
+        }
+      all_networks->add_child("networks.network", current_network);
+     }
+   catch (std::exception& e)
+     {
+       safe_journal(SD_ERR, std::string{"Processing row: "} + e.what());
+       return -1;
+     }
+  return 0;
+}
+
+boost::property_tree::ptree
+Database::all_networks() const
+{
+  char* errmsg = nullptr;
+  auto result = boost::property_tree::ptree{};
+  result.add("networks", "");
+  if (sqlite3_exec(db_,
+                   "SELECT * FROM Networks",
+                   &process_result_row,
+                   reinterpret_cast<void*>(&result),
+                   &errmsg) != SQLITE_OK)
+    {
+      std::string reason{errmsg};
+      sqlite3_free(errmsg);
+      throw std::runtime_error{"Can't get networks: " + reason};
+    }
+  safe_journal(SD_DEBUG, "Executed query SELECT * FROM Networks");
+  return result;
 }
 
 Database::~Database()

@@ -63,7 +63,7 @@ std::string
 Fixture::get_response(boost::asio::ip::tcp::socket* socket)
 {
   boost::asio::streambuf sb;
-  boost::asio::read_until(*socket, sb, "\r\n");
+  boost::asio::read_until(*socket, sb, "</networks>");
   return read_line_from_streambuf(&sb);
 }
 
