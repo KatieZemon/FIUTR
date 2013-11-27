@@ -5,10 +5,10 @@ import android.app.ListActivity;
 import android.net.wifi.ScanResult;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.app.NavUtils;
 import android.view.*;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.support.v4.app.NavUtils;
 
 public class ScanActivity extends ListActivity
 {

@@ -11,9 +11,9 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
-import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import android.widget.Toast;
+import android.support.v4.app.NavUtils;
 
 public class ViewAllActivity extends PreferenceActivity {
 
