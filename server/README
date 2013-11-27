@@ -9,6 +9,20 @@ make
 sudo make install
 sudo systemctl enable groupgd.socket
 
-If you're working from git, you need to run ./autogen.sh to generate configure.
+Some points to consider:
 
-Socket activation is required, so do not enable groupgd.service.
+* Working from git? Run ./autogen.sh to generate configure.
+* Reinstalled the server? Then you'd better 'sudo systemctl daemon-reload'
+* Socket activation is required. Do not enable groupgd.service.
+* TCP port 50000 needs to be unblocked.
+
+
+=== I don't know anything! ===
+
+I don't either, but you can:
+
+1) Install Fedora. It has systemd.
+2) sudo yum install boost-devel sqlite-devel systemd-devel
+3) Follow the steps above.
+4) In Fedora, you can use the firewalld GUI to open port 50000.
+5) Profit.
