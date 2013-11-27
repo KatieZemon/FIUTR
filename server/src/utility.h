@@ -22,6 +22,7 @@
 #ifndef GROUPGD_UTILITY_H_
 #define GROUPGD_UTILITY_H_
 
+#include <cmath>
 #include <streambuf>
 #include <string>
 
@@ -40,6 +41,14 @@ streambuf_to_ptree(std::streambuf* streambuf);
 
 void
 safe_journal(const char* priority, std::string message);
+
+// http://stackoverflow.com/a/17341
+template <typename T>
+  bool
+  nearly_equal(T a, T b)
+  {
+    return std::fabs(a - b) < 0.0001;
+  }
 
 }
 
