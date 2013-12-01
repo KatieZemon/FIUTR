@@ -29,8 +29,8 @@ namespace groupgd {
 struct Network
 {
   std::string name;
-  double lat;
-  double lon;
+  float lat;
+  float lon;
   float strength;
 };
 
