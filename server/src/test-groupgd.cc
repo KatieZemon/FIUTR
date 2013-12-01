@@ -29,6 +29,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/property_tree/ptree.hpp>
+#include <boost/regex.hpp>
 #include <boost/test/output_test_stream.hpp>
 #include <boost/test/unit_test.hpp>
 
@@ -49,7 +50,7 @@ static boost::property_tree::ptree
 receive_networks(boost::asio::ip::tcp::socket* socket)
 {
   boost::asio::streambuf sb;
-  boost::asio::read_until(*socket, sb, "</networks>");
+  boost::asio::read_until(*socket, sb, boost::regex{"</networks>|<networks/>"});
   return streambuf_to_ptree(&sb);
 }
 
