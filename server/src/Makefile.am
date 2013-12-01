@@ -26,6 +26,7 @@ groupgd_SOURCES = \
 	connection_manager.cc \
 	database.h \
 	database.cc \
+	network.h \
 	utility.h \
 	utility.cc
 
