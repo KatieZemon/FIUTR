@@ -191,8 +191,8 @@ network_from_row(void* optional_network, int rows,
 
       auto result =
           reinterpret_cast<boost::optional<Network>*>(optional_network);
-      if (*result)
-        throw std::runtime_error{"Multiple rows for same network"};
+       if (*result)
+         throw std::runtime_error{"Multiple rows for same network"};
        *result = network;
      }
    catch (std::exception& e)
