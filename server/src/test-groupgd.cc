@@ -21,6 +21,9 @@
 
 #define BOOST_TEST_MODULE groupgd
 
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MAIN
+
 #include <iostream>
 #include <string>
 
