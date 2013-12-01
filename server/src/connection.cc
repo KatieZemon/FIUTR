@@ -88,6 +88,7 @@ Connection::on_read_completed(const boost::system::error_code& ec)
   if (!ec)
     {
       auto query = read_line_from_streambuf(&streambuf_);
+      safe_journal(SD_DEBUG, "Read from client: " + query);
       // These operations are themselves responsible for calling
       // async_await_client_query when they are finished.
       if (query == "GET NETWORKS")
@@ -152,6 +153,7 @@ Connection::async_send_networks_to_client()
 {
   deadline_timer_.expires_from_now(TIMEOUT);
   auto ptree = database_.all_networks();
+  safe_journal(SD_DEBUG, "Sending to client: " + ptree_to_string(ptree));
   std::ostream ostream{&streambuf_};
   boost::property_tree::write_xml(ostream, ptree);
   boost::asio::async_write(socket_, streambuf_,
