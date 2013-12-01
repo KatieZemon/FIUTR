@@ -61,7 +61,7 @@ private:
   async_await_client_query();
 
   void
-  on_deadline_timer_expired();
+  on_deadline_timer_expired(const boost::system::error_code& ec);
 
   void
   on_read_completed(const boost::system::error_code& ec);

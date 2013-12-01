@@ -55,7 +55,8 @@ void
 Connection::async_run()
 {
   deadline_timer_.async_wait(std::bind(&Connection::on_deadline_timer_expired,
-                                       shared_from_this()));
+                                       shared_from_this(),
+                                       std::placeholders::_1));
   async_await_client_query();
 }
 
@@ -70,16 +71,14 @@ Connection::async_await_client_query()
 }
 
 void
-Connection::on_deadline_timer_expired()
+Connection::on_deadline_timer_expired(const boost::system::error_code& ec)
 {
-  // Timed operation could have completed after the timer expired, yet before
-  // this function was called. In that case, keep the connection open.
-  if (deadline_timer_.expires_at()
-        <= boost::asio::deadline_timer::traits_type::now())
-    stop();
-  else
-    deadline_timer_.async_wait(std::bind(&Connection::on_deadline_timer_expired,
-                                         shared_from_this()));
+  if (ec == boost::asio::error::operation_aborted)
+    return;
+
+  deadline_timer_.async_wait(std::bind(&Connection::on_deadline_timer_expired,
+                                       shared_from_this(),
+                                       std::placeholders::_1));
 }
 
 void
