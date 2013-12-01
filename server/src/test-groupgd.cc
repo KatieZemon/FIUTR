@@ -57,17 +57,18 @@ static void
 add_network(const Network& network, boost::asio::ip::tcp::socket* socket)
 {
   std::ostringstream oss;
-  oss << "ADD NETWORK " << network.name << " " << network.lat
+  oss.precision(6);
+  oss << std::fixed << "ADD NETWORK " << network.name << " " << network.lat
       << " " << network.lon << " " << network.strength;
   BOOST_TEST_MESSAGE("Sending: " + oss.str());
   oss << "\r\n";
   boost::asio::write(*socket, boost::asio::buffer(oss.str()));
 }
 
-static void
-ensure_network_exists(const Network& needle,
-                      const boost::property_tree::ptree& haystack)
+static bool
+network_in(const Network& needle, const boost::property_tree::ptree& haystack)
 {
+  int count = 0;
   for (const auto& pair : haystack)
     {
       auto network = pair.second;
@@ -75,9 +76,10 @@ ensure_network_exists(const Network& needle,
           && nearly_equal(network.get<float>("lat"), needle.lat)
           && nearly_equal(network.get<float>("lon"), needle.lon)
           && nearly_equal(network.get<float>("strength"), needle.strength))
-        return;
+        ++count;
     }
-  BOOST_ERROR("Valid network not found in database");
+  BOOST_CHECK_EQUAL(count == 0 || count == 1, true);
+  return count;
 }
 
 struct Fixture
@@ -113,7 +115,76 @@ BOOST_AUTO_TEST_CASE(add_valid_network)
   add_network({"Test", 135, 34.54, 7}, &socket_);
   request_networks(&socket_);
   auto ptree = receive_networks(&socket_);
-  ensure_network_exists({"Test", 135, 34.54, 7}, ptree);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54, 7}, ptree), true);
+}
+
+BOOST_AUTO_TEST_CASE(add_exact_duplicate_network)
+{
+  add_network({"Test", 135, 34.54, 7}, &socket_);
+  request_networks(&socket_);
+  auto ptree = receive_networks(&socket_);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54, 7}, ptree), true);
+}
+
+BOOST_AUTO_TEST_CASE(add_network_different_name)
+{
+  add_network({"TestTwo", 135, 34.54, 7}, &socket_);
+  request_networks(&socket_);
+  auto ptree = receive_networks(&socket_);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54, 7}, ptree), true);
+  BOOST_CHECK_EQUAL(network_in({"TestTwo", 135, 34.54, 7}, ptree), true);
+}
+
+BOOST_AUTO_TEST_CASE(add_valid_nearby_network_lower_strength)
+{
+  add_network({"Test", 135, 34.54003, 6}, &socket_);
+  BOOST_CHECK_EQUAL(34.54 == 34.54003, false);
+  request_networks(&socket_);
+  auto ptree = receive_networks(&socket_);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54, 7}, ptree), true);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54003, 6}, ptree), false);
+}
+
+BOOST_AUTO_TEST_CASE(add_valid_nearby_network_equal_strength)
+{
+  add_network({"Test", 135, 34.54003, 7}, &socket_);
+  BOOST_CHECK_EQUAL(34.54 == 34.54003, false);
+  request_networks(&socket_);
+  auto ptree = receive_networks(&socket_);
+  // Original network is retained
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54, 7}, ptree), true);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54003, 7}, ptree), false);
+}
+
+BOOST_AUTO_TEST_CASE(add_valid_nearby_network_higher_strength)
+{
+  add_network({"Test", 135, 34.54003, 8}, &socket_);
+  BOOST_CHECK_EQUAL(34.54 == 34.54003, false);
+  request_networks(&socket_);
+  auto ptree = receive_networks(&socket_);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54, 7}, ptree), false);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54003, 8}, ptree), true);
+}
+
+BOOST_AUTO_TEST_CASE(add_valid_nearby_network_previous_strength)
+{
+  add_network({"Test", 135, 34.54003, 7}, &socket_);
+  BOOST_CHECK_EQUAL(34.54 == 34.54003, false);
+  request_networks(&socket_);
+  auto ptree = receive_networks(&socket_);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54, 7}, ptree), false);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54003, 7}, ptree), false);
+  BOOST_CHECK_EQUAL(network_in({"Test", 135, 34.54003, 8}, ptree), true);
+}
+
+// https://github.com/ktacos/FIUTR/issues/17
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(network_name_includes_whitespace, 1)
+BOOST_AUTO_TEST_CASE(network_name_includes_whitespace)
+{
+  add_network({"A Space", 135, 34.54, 7}, &socket_);
+  request_networks(&socket_);
+  auto ptree = receive_networks(&socket_);
+  BOOST_CHECK_EQUAL(network_in({"A Space", 135, 34.54, 7}, ptree), true);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
