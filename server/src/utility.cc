@@ -35,7 +35,7 @@ std::string
 read_line_from_streambuf(std::streambuf* streambuf)
 {
   std::istream is{streambuf};
-  auto response = std::string{};
+  std::string response;
   std::getline(is, response);
   // Prune delimiter
   if (response.length() > 0)
@@ -47,8 +47,8 @@ std::string
 read_all_from_streambuf(std::streambuf* streambuf)
 {
   std::istream is{streambuf};
-  auto response = std::string{};
-  auto temp = std::string{};
+  std::string response;
+  std::string temp;
   do
     {
       temp.clear();

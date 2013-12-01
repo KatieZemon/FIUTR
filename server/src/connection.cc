@@ -129,7 +129,7 @@ Connection::async_add_network_to_database(std::string query)
   // Discard the command ADD NETWORK
   std::string trash;
   iss >> trash >> trash;
-  auto network = Network{};
+  Network network;
   iss >> network.name;
   iss >> network.lat;
   iss >> network.lon;

@@ -42,7 +42,7 @@ namespace groupgd {
 static void
 request_networks(boost::asio::ip::tcp::socket* socket)
 {
-  auto query = std::string{"GET NETWORKS\r\n"};
+  std::string query{"GET NETWORKS\r\n"};
   boost::asio::write(*socket, boost::asio::buffer(query));
 }
 

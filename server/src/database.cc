@@ -133,7 +133,7 @@ add_row_to_ptree(void* ptree, int rows, char** column_text, char** column_name)
   try
     {
       auto all_networks = reinterpret_cast<boost::property_tree::ptree*>(ptree);
-      auto current_network = boost::property_tree::ptree{};
+      boost::property_tree::ptree current_network;
       for (int i = 0; i < rows; ++i, ++column_text, ++column_name)
         {
           current_network.put(*column_name, *column_text);
@@ -152,7 +152,7 @@ boost::property_tree::ptree
 Database::all_networks() const
 {
   char* errmsg = nullptr;
-  auto result = boost::property_tree::ptree{};
+  boost::property_tree::ptree result;
   result.add("networks", "");
   if (sqlite3_exec(db_,
                    "SELECT * FROM Networks",
@@ -174,7 +174,7 @@ network_from_row(void* optional_network, int rows,
 {
   try
     {
-      auto network = Network{};
+      Network network;
 
       for (int i = 0; i < rows; ++i, ++column_text, ++column_name)
         if (strcmp(*column_name, "name") == 0)
@@ -212,7 +212,7 @@ Database::find_network(const Network& network)
       << network.lat << " AND lon=" << network.lon << " AND strength="
       << network.strength << ";";
   char* errmsg = nullptr;
-  auto result = boost::optional<Network>{};
+  boost::optional<Network> result;
   if (sqlite3_exec(db_,
                    oss.str().c_str(),
                    &network_from_row,
