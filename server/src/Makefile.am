@@ -18,7 +18,7 @@ groupgd_LDADD = \
 	$(BOOST_DATE_TIME_LIBS) \
 	$(BOOST_SYSTEM_LIBS) \
 	$(GROUPGD_LIBS) \
-	libgroupgd.la
+	$(builddir)/libgroupgd.la
 
 groupgd_LDFLAGS = \
 	$(BOOST_DATE_TIME_LDFLAGS) \
@@ -46,7 +46,7 @@ test_groupgd_LDADD = \
 	$(BOOST_REGEX_LIBS) \
 	$(BOOST_SYSTEM_LIBS) \
 	$(BOOST_UNIT_TEST_FRAMEWORK_LIBS) \
-	libgroupgd.la
+	$(builddir)/libgroupgd.la
 
 test_groupgd_LDFLAGS = \
 	$(BOOST_DATE_TIME_LDFLAGS) \
