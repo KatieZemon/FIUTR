@@ -114,8 +114,9 @@ Database::remove_network(const Network& network)
 {
   // FIXME should be a prepared statement to prevent injections
   std::ostringstream oss;
-  oss << "REMOVE FROM Networks VALUES ('" << network.name << "', "
-      << network.lat << ", " << network.lon << ", " << network.strength << ");";
+  oss << "DELETE FROM Networks WHERE name='" << network.name << "' AND lat="
+      << network.lat << " AND lon=" << network.lon << " AND strength="
+      << network.strength << ";";
   char* errmsg = nullptr;
   if (sqlite3_exec(db_, oss.str().c_str(),
                    nullptr, nullptr, &errmsg) != SQLITE_OK)
