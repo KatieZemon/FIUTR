@@ -177,13 +177,13 @@ network_from_row(void* optional_network, int rows,
       Network network;
 
       for (int i = 0; i < rows; ++i, ++column_text, ++column_name)
-        if (strcmp(*column_name, "name") == 0)
+        if (std::strcmp(*column_name, "name") == 0)
           network.name = *column_text;
-        else if (strcmp(*column_name, "lat") == 0)
+        else if (std::strcmp(*column_name, "lat") == 0)
           network.lat = boost::lexical_cast<double>(*column_text);
-        else if (strcmp(*column_name, "lon") == 0)
+        else if (std::strcmp(*column_name, "lon") == 0)
           network.lon = boost::lexical_cast<double>(*column_text);
-        else if (strcmp(*column_name, "strength") == 0)
+        else if (std::strcmp(*column_name, "strength") == 0)
           network.strength = boost::lexical_cast<double>(*column_text);
         else
           throw std::runtime_error{
