@@ -17,7 +17,7 @@ import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 
 /**
- * MainActivity serves as the home page for the wardriving application. It
+ * MainActivity serves as the home page for the application. It
  * contains the map which shows the user's location and surrounding WiFi points
  * stored in our database.
  */
