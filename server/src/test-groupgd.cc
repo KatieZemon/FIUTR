@@ -72,8 +72,8 @@ ensure_network_exists(const Network& needle,
     {
       auto network = pair.second;
       if (network.get<std::string>("name") == needle.name
-          && nearly_equal(network.get<double>("lat"), needle.lat)
-          && nearly_equal(network.get<double>("lon"), needle.lon)
+          && nearly_equal(network.get<float>("lat"), needle.lat)
+          && nearly_equal(network.get<float>("lon"), needle.lon)
           && nearly_equal(network.get<float>("strength"), needle.strength))
         return;
     }
