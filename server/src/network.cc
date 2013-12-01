@@ -1,6 +1,6 @@
 /* -*- indent-tabs-mode: nil; c-basic-offset: 2; tab-width: 2 -*-  */
 /*
- * network.h
+ * network.cc
  * Copyright (C) 2013 Michael Catanzaro <michael.catanzaro@mst.edu>
  *
  * This file is part of groupgd.
@@ -18,33 +18,44 @@
  * You should have received a copy of the GNU General Public License along
  * with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
- 
-#ifndef GROUPGD_NETWORK_H_
-#define GROUPGD_NETWORK_H_
 
-#include <string>
+#include "network.h"
+
+#include <cmath>
+
+#include "utility.h"
 
 namespace groupgd {
 
-const int IDENTICAL_NETWORK_METERS = 40;
-
-struct Network
-{
-  std::string name;
-  float lat;
-  float lon;
-  float strength;
-};
-
-// Equivalent if very close and have same SSID
 bool
-operator==(Network n1, Network n2);
-
-bool operator!=(Network n1, Network n2);
-
-float
-distance(Network n1, Network n2);
-
+operator==(Network n1, Network n2)
+{
+  return n1.name == n2.name
+          && ((nearly_equal(n1.lat, n2.lat) && nearly_equal(n1.lon, n2.lon))
+              || distance(n1, n2) <= IDENTICAL_NETWORK_METERS);
 }
 
-#endif
+bool
+operator!=(Network n1, Network n2)
+{
+  return !(n1 == n2);
+}
+
+static double
+haversin(double theta)
+{
+  return std::pow(std::sin(theta/2), 2);
+}
+
+// http://en.wikipedia.org/wiki/Haversine_formula
+// in meters, assumes a perfectly spherical Earth
+float
+distance(Network n1, Network n2)
+{
+  const static int EQUATORIAL_RADIUS = 6378137;
+  return 2 * EQUATORIAL_RADIUS * std::asin(std::sqrt(
+      haversin(n2.lat-n1.lat)
+      + std::cos(n1.lat)*std::cos(n2.lat)*haversin(n2.lon-n1.lon)));
+}
+
+}

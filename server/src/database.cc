@@ -27,9 +27,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <sqlite3.h>
 #include <systemd/sd-daemon.h>
@@ -90,9 +90,19 @@ Database::ensure_network_table_exists()
 void
 Database::add_network(const Network& network)
 {
-  // FIXME what about nearby networks?
-  if (find_network(network))
-    return;
+  for (const auto& similar_network : networks_with_ssid(network.name))
+    if (similar_network == network)
+      {
+        if (network.strength > similar_network.strength)
+          {
+            remove_network(similar_network);
+            break;
+          }
+        else
+          {
+            return;
+          }
+      }
 
   // FIXME should be a prepared statement to prevent injections
   std::ostringstream oss;
@@ -170,8 +180,8 @@ Database::all_networks() const
 }
 
 static int
-network_from_row(void* optional_network, int rows,
-                 char** column_text, char** column_name)
+append_network_from_row(void* list, int rows,
+                        char** column_text, char** column_name)
 {
   try
     {
@@ -190,11 +200,7 @@ network_from_row(void* optional_network, int rows,
           throw std::runtime_error{
               std::string{"Unexpected column: "} + *column_name};
 
-      auto result =
-          reinterpret_cast<boost::optional<Network>*>(optional_network);
-       if (*result)
-         throw std::runtime_error{"Multiple rows for same network"};
-       *result = network;
+       reinterpret_cast<std::vector<Network>*>(list)->push_back(network);
      }
    catch (std::exception& e)
      {
@@ -204,20 +210,18 @@ network_from_row(void* optional_network, int rows,
   return 0;
 }
 
-boost::optional<Network>
-Database::find_network(const Network& network)
+std::vector<Network>
+Database::networks_with_ssid(std::string name)
 {
   // FIXME should be a prepared statement to prevent injections
   std::ostringstream oss;
-  oss << "SELECT * FROM Networks WHERE name='" << network.name << "' AND lat="
-      << network.lat << " AND lon=" << network.lon << " AND strength="
-      << network.strength << ";";
+  oss << "SELECT * FROM Networks WHERE name='" << name << "';";
   char* errmsg = nullptr;
-  boost::optional<Network> result;
+  std::vector<Network> networks;
   if (sqlite3_exec(db_,
                    oss.str().c_str(),
-                   &network_from_row,
-                   reinterpret_cast<void*>(&result),
+                   &append_network_from_row,
+                   reinterpret_cast<void*>(&networks),
                    &errmsg) != SQLITE_OK)
     {
       std::string reason{errmsg};
@@ -225,7 +229,7 @@ Database::find_network(const Network& network)
       throw std::runtime_error{"Can't get network: " + reason};
     }
   safe_journal(SD_DEBUG, "Executed query " + oss.str());
-  return result;
+  return networks;
 }
 
 Database::~Database()

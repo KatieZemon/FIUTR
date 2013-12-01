@@ -3,6 +3,7 @@ bin_PROGRAMS = groupgd
 noinst_LTLIBRARIES = libgroupgd.la
 
 libgroupgd_la_SOURCES = \
+	network.cc \
 	network.h \
 	utility.cc \
 	utility.h
@@ -33,7 +34,7 @@ groupgd_SOURCES = \
 	database.h \
 	database.cc
 
-check_PROGRAMS = db-manager test-groupgd
+check_PROGRAMS = db-manager test-groupgd test-network-cc
 
 db_manager_CPPFLAGS = -DLOCALSTATEDIR=\"$(localstatedir)\"
 
@@ -56,9 +57,20 @@ test_groupgd_LDFLAGS = \
 
 test_groupgd_SOURCES = test-groupgd.cc
 
+test_network_cc_CPPFLAGS = $(BOOST_CPPFLAGS)
+
+test_network_cc_LDADD = \
+	$(BOOST_UNIT_TEST_FRAMEWORK_LIBS) \
+	$(builddir)/libgroupgd.la
+
+test_network_cc_LDFLAGS = $(BOOST_UNIT_TEST_FRAMEWORK_LDFLAGS)
+
+test_network_cc_SOURCES = test-network.cc
+
 check-local: $(check_PROGRAMS)
-	sudo $(builddir)/db-manager stash
-	$(builddir)/test-groupgd || true
+	$(builddir)/test-network-cc
+	sudo $(builddir)/db-manager stash || true
+	$(builddir)/test-groupgd \
 	sudo $(builddir)/db-manager restore
 
 -include $(top_srcdir)/git.mk
