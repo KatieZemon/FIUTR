@@ -67,6 +67,14 @@ streambuf_to_ptree(std::streambuf* streambuf)
   return result;
 }
 
+std::string
+ptree_to_string(const boost::property_tree::ptree& ptree)
+{
+  std::stringstream ss;
+  boost::property_tree::write_xml(ss, ptree);
+  return read_all_from_streambuf(ss.rdbuf());
+}
+
 void
 safe_journal(const char* priority, std::string message)
 {
