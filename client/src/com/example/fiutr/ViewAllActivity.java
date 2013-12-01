@@ -15,8 +15,17 @@ import android.view.MenuItem;
 import android.widget.Toast;
 import android.support.v4.app.NavUtils;
 
+/**
+ * ViewAllActivity creates a page which displays a list of networks. This is used for viewing
+ * all of the networks in the database or for viewing a list of networks when performing a search.
+ */
 public class ViewAllActivity extends PreferenceActivity {
 
+	/**
+	 * Function automatically called with the ViewAllActivity page is created.
+	 * It sets the activity_viewall layout containing a list of the networks 
+	 * to be displayed
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -32,6 +41,10 @@ public class ViewAllActivity extends PreferenceActivity {
 		}
 	}
 
+	/**
+	 * The user will return to the home page when the back button
+	 * at the top of the screen is pressed
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -45,7 +58,6 @@ public class ViewAllActivity extends PreferenceActivity {
 
 	@SuppressLint("ValidFragment")
 	public class PrefsFragment extends PreferenceFragment {
-
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 

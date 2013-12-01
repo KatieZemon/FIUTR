@@ -84,16 +84,18 @@ public class ScanActivity extends ListActivity
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle presses on the action bar items
-		switch (item.getItemId()) {
-		case R.id.action_refresh:
+		int itemID = item.getItemId();
+		if (itemID ==  R.id.action_refresh) {
 			onUpdate();
 			return true;
-		case android.R.id.home:
+		}
+		else if (itemID == android.R.id.home)
+		{
 			NavUtils.navigateUpFromSameTask(this);
 			return true;
-		default:
-			return super.onOptionsItemSelected(item);
 		}
+		else
+			return super.onOptionsItemSelected(item);		
 	}	
 }
 

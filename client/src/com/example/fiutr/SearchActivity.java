@@ -12,21 +12,32 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.support.v4.app.NavUtils;
 
+/**
+ * SearchActivity creates the Search page in which users can modify the values of each 
+ * search criteria (distance, signal strength, and number of results). This page also includes
+ * a button to perform the search and return a list of the networks according to the user
+ * preferences
+ */
 public class SearchActivity extends Activity {
 
 	// SeekBars for setting preferences
-	private SeekBar prefDistSeekbar;
-	private SeekBar prefSignalSeekbar;
-	private SeekBar prefResultsSeekbar;
+	private SeekBar prefDistSeekbar; // Seekbar for setting the distance
+	private SeekBar prefSignalSeekbar; // Seekbar for setting the minimal signal strength
+	private SeekBar prefResultsSeekbar; // Seekbar for setting the maximum number of results returned
 	
 	// Values of our preferences
-	private TextView prefDistVal;
-	private TextView prefSignalVal;
-	private TextView prefResultsVal;
+	private TextView prefDistVal; // The maximum distance away from the user's current location
+	private TextView prefSignalVal; // The minimum signal strength of the networks returned from a search
+	private TextView prefResultsVal; // The maximum number of networks returned from a search
 	
 	// Search button
 	private Button searchButton;
 	
+	/**
+	 * Function automatically called when the SearchActivity page is created.
+	 * It initializes the seekbars (and values of seekBars according to what has been
+	 * saved from previously using the application) and initializes the searchButton
+	 */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -61,6 +72,10 @@ public class SearchActivity extends Activity {
 		// Search Button
 		searchButton = (Button) findViewById(R.id.save);
 		searchButton.setOnClickListener(new OnClickListener() {
+			/**
+			 * Stores the preference values set by the user and opens a page to display
+			 * the search results
+			 */
 			public void onClick(View v) {
 				savePreferences();
 				finish();
@@ -75,8 +90,14 @@ public class SearchActivity extends Activity {
 		}
 	}
 	
+	/**
+	 * Listener class for when one of the seekbar values is changed. This will update the
+	 * textfield which displays the value of each seekbar
+	 */
 	private class SeekBarListener implements SeekBar.OnSeekBarChangeListener {
-
+		/**
+		 * Updates the textfield displaying the value of the seekbar being used
+		 */
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
             if (seekBar == prefDistSeekbar)
             	prefDistVal.setText(""+progress+ " miles");
@@ -92,7 +113,10 @@ public class SearchActivity extends Activity {
 
     }
  
-
+	/**
+	 * The user will return to the home page when the back button
+	 * at the top of the screen is pressed
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -104,6 +128,11 @@ public class SearchActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 
+	/**
+	 * Stores the values of each seekbar so that the next time this page is opened,
+	 * these saved values will be loaded. This is called when the user presses the "Search"
+	 * button
+	 */
 	private void savePreferences() {
 		SharedPreferences customSharedPreference = getSharedPreferences(
 				"myCustomSharedPrefs", Activity.MODE_PRIVATE);

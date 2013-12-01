@@ -7,7 +7,17 @@ import android.os.Bundle;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
+/**
+ * AboutActivity creates the About page which displays information about the app,
+ * including the authors and a list of references
+ */
 public class AboutActivity extends Activity {
+	
+	/**
+	 * Function automatically called with the About page is created.
+	 * It loads the activity_about layout which contains a textview
+	 * containing all of the information that will be displayed on this page
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -20,6 +30,10 @@ public class AboutActivity extends Activity {
 		}
 	}
 
+	/**
+	 * The user will return to the home page when the back button
+	 * at the top of the screen is pressed
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
