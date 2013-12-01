@@ -30,6 +30,8 @@ class sqlite3;
 
 namespace groupgd {
 
+struct Network;
+
 class Database
 {
 public:
@@ -38,7 +40,7 @@ public:
   ~Database();
 
   void
-  add_network(std::string name, double lat, double lon, float strength);
+  add_network(const Network& network);
 
   boost::property_tree::ptree
   all_networks() const;

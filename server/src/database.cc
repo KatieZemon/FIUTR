@@ -32,6 +32,7 @@
 #include <sqlite3.h>
 #include <systemd/sd-daemon.h>
 
+#include "network.h"
 #include "utility.h"
 
 namespace groupgd {
@@ -85,13 +86,13 @@ Database::ensure_network_table_exists()
 }
 
 void
-Database::add_network(std::string name, double lat, double lon, float strength)
+Database::add_network(const Network& network)
 {
   // FIXME what about duplicate networks (also nearby networks?)
   // FIXME should be a prepared statement to prevent injections
   std::ostringstream oss;
-  oss << "INSERT INTO Networks VALUES ('" << name << "', "
-      << lat << ", " << lon << ", " << strength << ");";
+  oss << "INSERT INTO Networks VALUES ('" << network.name << "', "
+      << network.lat << ", " << network.lon << ", " << network.strength << ");";
   char* errmsg = nullptr;
   if (sqlite3_exec(db_, oss.str().c_str(),
                    nullptr, nullptr, &errmsg) != SQLITE_OK)

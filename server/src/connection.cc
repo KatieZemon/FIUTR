@@ -31,6 +31,7 @@
 #include <boost/system/system_error.hpp>
 #include <systemd/sd-daemon.h>
 
+#include "network.h"
 #include "utility.h"
 
 namespace groupgd {
@@ -128,15 +129,12 @@ Connection::async_add_network_to_database(std::string query)
   // Discard the command ADD NETWORK
   std::string trash;
   iss >> trash >> trash;
-  std::string name;
-  iss >> name;
-  double lat = 0.0f;
-  iss >> lat;
-  double lon = 0.0f;
-  iss >> lon;
-  float strength = 0.0f;
-  iss >> strength;
-  database_.add_network(name, lat, lon, strength);
+  auto network = Network{};
+  iss >> network.name;
+  iss >> network.lat;
+  iss >> network.lon;
+  iss >> network.strength;
+  database_.add_network(network);
   async_await_client_query();
 }
 
