@@ -100,10 +100,11 @@ struct Fixture
 
 BOOST_FIXTURE_TEST_SUITE(groupgd, Fixture)
 
-BOOST_AUTO_TEST_CASE(get_networks_returns_response)
+BOOST_AUTO_TEST_CASE(get_zero_networks)
 {
   request_networks(&socket_);
-  receive_networks(&socket_);
+  auto ptree = receive_networks(&socket_);
+  BOOST_CHECK_EQUAL(ptree.empty(), true);
 }
 
 BOOST_AUTO_TEST_CASE(add_valid_network)
