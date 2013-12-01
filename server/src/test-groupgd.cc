@@ -51,7 +51,7 @@ receive_networks(boost::asio::ip::tcp::socket* socket)
 {
   boost::asio::streambuf sb;
   boost::asio::read_until(*socket, sb, boost::regex{"</networks>|<networks/>"});
-  return streambuf_to_ptree(&sb);
+  return streambuf_to_ptree(&sb).get_child("networks");
 }
 
 static void
@@ -67,7 +67,7 @@ static void
 ensure_network_exists(const Network& needle,
                       const boost::property_tree::ptree& haystack)
 {
-  for (const auto& pair : haystack.get_child("networks"))
+  for (const auto& pair : haystack)
     {
       auto network = pair.second;
       if (network.get<std::string>("name") == needle.name
