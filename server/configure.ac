@@ -7,6 +7,8 @@ AM_INIT_AUTOMAKE([1.13 foreign dist-xz no-dist-gzip -Wall])
 AM_SILENT_RULES([yes])
 AM_MAINTAINER_MODE([enable])
 
+AM_PROG_AR
+
 LT_PREREQ([2.4])
 LT_INIT([disable-static])
 
