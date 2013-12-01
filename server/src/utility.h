@@ -50,7 +50,7 @@ template <typename T>
   bool
   nearly_equal(T a, T b)
   {
-    return std::fabs(a - b) < 0.000001;
+    return std::fabs(a - b) < 0.0001;
   }
 
 }
