@@ -28,6 +28,8 @@
 #include <stdexcept>
 #include <string>
 
+#include <boost/lexical_cast.hpp>
+#include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <sqlite3.h>
 #include <systemd/sd-daemon.h>
@@ -88,7 +90,10 @@ Database::ensure_network_table_exists()
 void
 Database::add_network(const Network& network)
 {
-  // FIXME what about duplicate networks (also nearby networks?)
+  // FIXME what about nearby networks?
+  if (find_network(network))
+    return;
+
   // FIXME should be a prepared statement to prevent injections
   std::ostringstream oss;
   oss << "INSERT INTO Networks VALUES ('" << network.name << "', "
@@ -123,8 +128,7 @@ Database::remove_network(const Network& network)
 }
 
 static int
-process_result_row(void* ptree, int rows,
-                   char** column_text, char** column_name)
+add_row_to_ptree(void* ptree, int rows, char** column_text, char** column_name)
 {
   try
     {
@@ -152,7 +156,7 @@ Database::all_networks() const
   result.add("networks", "");
   if (sqlite3_exec(db_,
                    "SELECT * FROM Networks",
-                   &process_result_row,
+                   &add_row_to_ptree,
                    reinterpret_cast<void*>(&result),
                    &errmsg) != SQLITE_OK)
     {
@@ -161,6 +165,65 @@ Database::all_networks() const
       throw std::runtime_error{"Can't get networks: " + reason};
     }
   safe_journal(SD_DEBUG, "Executed query SELECT * FROM Networks");
+  return result;
+}
+
+static int
+network_from_row(void* optional_network, int rows,
+                 char** column_text, char** column_name)
+{
+  try
+    {
+      auto network = Network{};
+
+      for (int i = 0; i < rows; ++i, ++column_text, ++column_name)
+        if (strcmp(*column_name, "name") == 0)
+          network.name = *column_text;
+        else if (strcmp(*column_name, "lat") == 0)
+          network.lat = boost::lexical_cast<double>(*column_text);
+        else if (strcmp(*column_name, "lon") == 0)
+          network.lon = boost::lexical_cast<double>(*column_text);
+        else if (strcmp(*column_name, "strength") == 0)
+          network.strength = boost::lexical_cast<double>(*column_text);
+        else
+          throw std::runtime_error{
+              std::string{"Unexpected column: "} + *column_name};
+
+      auto result =
+          reinterpret_cast<boost::optional<Network>*>(optional_network);
+      if (*result)
+        throw std::runtime_error{"Multiple rows for same network"};
+       *result = network;
+     }
+   catch (std::exception& e)
+     {
+       safe_journal(SD_ERR, std::string{"Processing row: "} + e.what());
+       return -1;
+     }
+  return 0;
+}
+
+boost::optional<Network>
+Database::find_network(const Network& network)
+{
+  // FIXME should be a prepared statement to prevent injections
+  std::ostringstream oss;
+  oss << "SELECT * FROM Networks WHERE name='" << network.name << "' AND lat="
+      << network.lat << " AND lon=" << network.lon << " AND strength="
+      << network.strength << ";";
+  char* errmsg = nullptr;
+  auto result = boost::optional<Network>{};
+  if (sqlite3_exec(db_,
+                   oss.str().c_str(),
+                   &network_from_row,
+                   reinterpret_cast<void*>(&result),
+                   &errmsg) != SQLITE_OK)
+    {
+      std::string reason{errmsg};
+      sqlite3_free(errmsg);
+      throw std::runtime_error{"Can't get network: " + reason};
+    }
+  safe_journal(SD_DEBUG, "Executed query " + oss.str());
   return result;
 }
 

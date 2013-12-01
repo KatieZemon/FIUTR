@@ -22,8 +22,10 @@
 #ifndef GROUPGD_DATABASE_H_
 #define GROUPGD_DATABASE_H_
 
+#include <memory>
 #include <string>
 
+#include <boost/optional.hpp>
 #include <boost/property_tree/ptree.hpp>
 
 class sqlite3;
@@ -56,6 +58,9 @@ private:
 
   void
   ensure_network_table_exists();
+
+  boost::optional<Network>
+  find_network(const Network& network);
 
   void
   remove_network(const Network& network);
