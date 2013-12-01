@@ -14,7 +14,7 @@ import android.support.v4.app.NavUtils;
 public class AboutActivity extends Activity {
 	
 	/**
-	 * Function automatically called with the About page is created.
+	 * Method automatically called with the About page is created.
 	 * It loads the activity_about layout which contains a textview
 	 * containing all of the information that will be displayed on this page
 	 */

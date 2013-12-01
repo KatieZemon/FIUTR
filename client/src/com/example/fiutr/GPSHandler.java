@@ -5,8 +5,8 @@ import android.content.*;
 import android.location.*;
 import android.widget.*;
 
-/*
- * 
+/**
+ * GPSHandler is used for handling GPS connections.
  */
 public class GPSHandler {
 	

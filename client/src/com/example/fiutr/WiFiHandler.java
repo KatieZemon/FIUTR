@@ -13,8 +13,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * WiFiHandler is used for handling WiFi connections. It is 
- * important for getting a list of local networks for the ScanActivity page.
+ * WiFiHandler is used for handling WiFi connections. This class provides several 
+ * useful methods such as getting a list of local networks, connecting to a specific
+ * network, and getting the signal strength of a network.
  */
 public class WiFiHandler {
 	
@@ -36,7 +37,7 @@ public class WiFiHandler {
 	}
 	
 	/**
-	 * This function performs a scan for local networks and stores a list of all these local
+	 * This method performs a scan for local networks and stores a list of all these local
 	 * networks. It first checks that Wifi is enabled, and if not, will enable the WiFi for
 	 * the user. It then checks the security of each network, only adding the networks
 	 * to the list that are not secured.
@@ -97,7 +98,7 @@ public class WiFiHandler {
 	}
 	
 	/**
-	 * This function is used for connecting to a specific network.
+	 * This method is used for connecting to a specific network.
 	 * @param subject This is the network for which we are trying to establish
 	 *        a connection
 	 */
@@ -117,7 +118,7 @@ public class WiFiHandler {
 	}
 	
 	/**
-	 * This function to returns a list of all local networks
+	 * This method to returns a list of all local networks
 	 */
 	public List<ScanResult> returnWifiResults()
 	{
@@ -125,7 +126,7 @@ public class WiFiHandler {
 	}
 	
 	/**
-	 * This function to returns the signal strength of a given network
+	 * This method returns the signal strength of a given network
 	 * @param subject The particular network for which we want to return its signal strength
 	 */
 	public int returnBars(ScanResult subject)

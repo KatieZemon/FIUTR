@@ -30,7 +30,7 @@ public class MainActivity extends Activity implements LocationListener{
 	private final ArrayList<Marker> markerList = new ArrayList<Marker>();
 	
 	/**
-	 * Function automatically called when the MainActivity page is created.
+	 * Method automatically called when the MainActivity page is created.
 	 * It creates a new GPSHandler and wifiHandler in order to display the map
 	 */
 	@Override
@@ -62,7 +62,7 @@ public class MainActivity extends Activity implements LocationListener{
 	}
 	
 	/**
-	 * This is the default function called when the user selects one of the
+	 * This is the default method called when the user selects one of the
 	 * menu options. It will open a new page based on the selected option.
 	 */
 	@Override
@@ -220,7 +220,7 @@ public class MainActivity extends Activity implements LocationListener{
 	}
 	
 	/**
-	 * Function automatically called to get the location of the user
+	 * Method automatically called to get the location of the user
 	 * and zoom in on that location 
 	 */
 	@Override

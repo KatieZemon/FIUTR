@@ -22,7 +22,7 @@ import android.support.v4.app.NavUtils;
 public class ViewAllActivity extends PreferenceActivity {
 
 	/**
-	 * Function automatically called with the ViewAllActivity page is created.
+	 * Method automatically called with the ViewAllActivity page is created.
 	 * It sets the activity_viewall layout containing a list of the networks 
 	 * to be displayed
 	 */

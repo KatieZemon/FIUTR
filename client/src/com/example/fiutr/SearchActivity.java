@@ -34,7 +34,7 @@ public class SearchActivity extends Activity {
 	private Button searchButton;
 	
 	/**
-	 * Function automatically called when the SearchActivity page is created.
+	 * Method automatically called when the SearchActivity page is created.
 	 * It initializes the seekbars (and values of seekBars according to what has been
 	 * saved from previously using the application) and initializes the searchButton
 	 */

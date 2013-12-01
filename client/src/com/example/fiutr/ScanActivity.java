@@ -24,7 +24,7 @@ public class ScanActivity extends ListActivity
 	Button connectButton;
 
 	/**
-	 * Function automatically called when the ScanActivity page is created.
+	 * Method automatically called when the ScanActivity page is created.
 	 * It creates a new GPSHandler and wifiHandler in order to display the map
 	 */
 	@Override
@@ -85,7 +85,7 @@ public class ScanActivity extends ListActivity
 	}
 	
 	/**
-	 * This function will rescan for all local networks and display
+	 * This method will rescan for all local networks and display
 	 * them onto the screen
 	 */
 	public void onUpdate()
@@ -116,7 +116,7 @@ public class ScanActivity extends ListActivity
 	}
 	
 	/**
-	 * This function is automatically called when the user presses either the back button
+	 * This method is automatically called when the user presses either the back button
 	 * at the top of the screen or one of the menu items. 
 	 */
 	@Override
