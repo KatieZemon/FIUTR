@@ -12,24 +12,41 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * WiFiHandler is used for handling WiFi connections. It is 
+ * important for getting a list of local networks for the ScanActivity page.
+ */
 public class WiFiHandler {
 	
 	private WifiManager mainWifi;
+	
+	/** A list of WiFi results produced when performing a scan for local networks */
 	private ArrayList<ScanResult> wifiResults = new ArrayList<ScanResult>();
+	
 	private Context wifiContext;
 	private String[] securityModes = {"WEP", "PSK", "EAP"};
 	
+	/**
+	 * WiFiHandler Constructor
+	 */
 	public WiFiHandler(Context passedContext)
 	{
 		wifiContext = passedContext;
 		mainWifi = (WifiManager) wifiContext.getSystemService(wifiContext.WIFI_SERVICE);
 	}
 	
+	/**
+	 * This function performs a scan for local networks and stores a list of all these local
+	 * networks. It first checks that Wifi is enabled, and if not, will enable the WiFi for
+	 * the user. It then checks the security of each network, only adding the networks
+	 * to the list that are not secured.
+	 */
 	public ArrayList<ScanResult> getWifiNetworks()
 	{
-		//Clear the list, making sure no remnants exist.
+		// Clear the list, making sure no remnants exist
 		wifiResults.clear();
-		//Checking if WiFi is enabled...
+		
+		// Checking if WiFi is enabled
 		if(mainWifi.isWifiEnabled() == false)
 		{
 			Toast.makeText(wifiContext, "WiFi is disabled! Enabling...", Toast.LENGTH_LONG).show();
@@ -37,24 +54,25 @@ public class WiFiHandler {
 		}
 		mainWifi.startScan();
 		List<ScanResult> tempList = mainWifi.getScanResults();
-		//Figuring out which are unsecured versus ones that aren't.
+		
+		// Figuring out which networks are secure versus which ones are not secure
 		Iterator<ScanResult> listIterator = tempList.iterator();
 		while(listIterator.hasNext())
 		{
 			ScanResult result = listIterator.next();
 			for(int i = 0; i < securityModes.length; i++)
 			{
-				// If the security capabilities contain anything with security, remove it from the list.
+				// If the security capabilities contain anything with security, remove it from the list
 				if((result.capabilities).contains(securityModes[i]))
 				{
 					listIterator.remove();
 				}
 			}
 		}
-		// Another loop removing duplicated SSIDs
+		// Another loop removing duplicate SSIDs
 		for(ScanResult result : tempList)
 		{
-			// If it has been added to the list already, remove it.
+			// If it has been added to the list already, remove it
 			Iterator<ScanResult> it = wifiResults.iterator();
 			boolean dup = false;
 			while(it.hasNext())
@@ -78,6 +96,11 @@ public class WiFiHandler {
 		return wifiResults;
 	}
 	
+	/**
+	 * This function is used for connecting to a specific network.
+	 * @param subject This is the network for which we are trying to establish
+	 *        a connection
+	 */
 	public boolean connectToNetwork(ScanResult subject)
 	{
 		WifiConfiguration config = new WifiConfiguration();
@@ -93,11 +116,18 @@ public class WiFiHandler {
 		return true;
 	}
 	
+	/**
+	 * This function to returns a list of all local networks
+	 */
 	public List<ScanResult> returnWifiResults()
 	{
 		return wifiResults;
 	}
 	
+	/**
+	 * This function to returns the signal strength of a given network
+	 * @param subject The particular network for which we want to return its signal strength
+	 */
 	public int returnBars(ScanResult subject)
 	{
 		return WifiManager.calculateSignalLevel(mainWifi.getConnectionInfo().getRssi(),6);
