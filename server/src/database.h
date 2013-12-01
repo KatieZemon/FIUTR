@@ -57,6 +57,9 @@ private:
   void
   ensure_network_table_exists();
 
+  void
+  remove_network(const Network& network);
+
   sqlite3* db_;
 };
 

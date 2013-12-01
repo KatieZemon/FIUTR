@@ -104,6 +104,24 @@ Database::add_network(const Network& network)
   safe_journal(SD_DEBUG, "Executed query " + oss.str());
 }
 
+void
+Database::remove_network(const Network& network)
+{
+  // FIXME should be a prepared statement to prevent injections
+  std::ostringstream oss;
+  oss << "REMOVE FROM Networks VALUES ('" << network.name << "', "
+      << network.lat << ", " << network.lon << ", " << network.strength << ");";
+  char* errmsg = nullptr;
+  if (sqlite3_exec(db_, oss.str().c_str(),
+                   nullptr, nullptr, &errmsg) != SQLITE_OK)
+    {
+      std::string reason{errmsg};
+      sqlite3_free(errmsg);
+      throw std::runtime_error{"Can't remove: " + reason};
+    }
+  safe_journal(SD_DEBUG, "Executed query " + oss.str());
+}
+
 static int
 process_result_row(void* ptree, int rows,
                    char** column_text, char** column_name)
