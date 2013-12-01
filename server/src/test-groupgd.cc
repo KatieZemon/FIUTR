@@ -48,7 +48,9 @@ receive_networks(boost::asio::ip::tcp::socket* socket)
 {
   boost::asio::streambuf sb;
   boost::asio::read_until(*socket, sb, boost::regex{"</networks>|<networks/>"});
-  return streambuf_to_ptree(&sb).get_child("networks");
+  auto result = streambuf_to_ptree(&sb);
+  BOOST_TEST_MESSAGE("Received: " + ptree_to_string(result));
+  return result.get_child("networks");
 }
 
 static void
@@ -56,7 +58,9 @@ add_network(const Network& network, boost::asio::ip::tcp::socket* socket)
 {
   std::ostringstream oss;
   oss << "ADD NETWORK " << network.name << " " << network.lat
-      << " " << network.lon << " " << network.strength << "\r\n";
+      << " " << network.lon << " " << network.strength;
+  BOOST_TEST_MESSAGE("Sending: " + oss.str());
+  oss << "\r\n";
   boost::asio::write(*socket, boost::asio::buffer(oss.str()));
 }
 
