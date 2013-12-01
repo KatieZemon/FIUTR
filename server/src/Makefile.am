@@ -55,6 +55,7 @@ test_groupgd_LDFLAGS = \
 
 test_groupgd_SOURCES = \
 	test-groupgd.cc \
+	network.h \
 	utility.h \
 	utility.cc
 

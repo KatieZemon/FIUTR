@@ -29,6 +29,7 @@
 #include <boost/test/output_test_stream.hpp>
 #include <boost/test/unit_test.hpp>
 
+#include "network.h"
 #include "utility.h"
 
 namespace groupgd {
@@ -50,29 +51,25 @@ receive_networks(boost::asio::ip::tcp::socket* socket)
 }
 
 static void
-add_network(std::string name, double lat, double lon, float strength,
-            boost::asio::ip::tcp::socket* socket)
+add_network(const Network& network, boost::asio::ip::tcp::socket* socket)
 {
   std::ostringstream oss;
-  oss << "ADD NETWORK " << name << " " << lat
-      << " " << lon << " " << strength << "\r\n";
+  oss << "ADD NETWORK " << network.name << " " << network.lat
+      << " " << network.lon << " " << network.strength << "\r\n";
   boost::asio::write(*socket, boost::asio::buffer(oss.str()));
 }
 
 static void
-ensure_network_exists(const boost::property_tree::ptree& ptree,
-                      std::string name,
-                      double lat,
-                      double lon,
-                      float strength)
+ensure_network_exists(const Network& needle,
+                      const boost::property_tree::ptree& haystack)
 {
-  for (const auto& pair : ptree.get_child("networks"))
+  for (const auto& pair : haystack.get_child("networks"))
     {
       auto network = pair.second;
-      if (network.get<std::string>("name") == name
-          && nearly_equal(network.get<double>("lat"), lat)
-          && nearly_equal(network.get<double>("lon"), lon)
-          && nearly_equal(network.get<float>("strength"), strength))
+      if (network.get<std::string>("name") == needle.name
+          && nearly_equal(network.get<double>("lat"), needle.lat)
+          && nearly_equal(network.get<double>("lon"), needle.lon)
+          && nearly_equal(network.get<float>("strength"), needle.strength))
         return;
     }
   BOOST_ERROR("Valid network not found in database");
@@ -107,10 +104,10 @@ BOOST_AUTO_TEST_CASE(get_networks_returns_response)
 
 BOOST_AUTO_TEST_CASE(add_valid_network)
 {
-  add_network("Test", 135, 34.54, 7, &socket_);
+  add_network({"Test", 135, 34.54, 7}, &socket_);
   request_networks(&socket_);
   auto ptree = receive_networks(&socket_);
-  ensure_network_exists(ptree, "Test", 135, 34.54, 7);
+  ensure_network_exists({"Test", 135, 34.54, 7}, ptree);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
