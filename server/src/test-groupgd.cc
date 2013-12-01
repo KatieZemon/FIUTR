@@ -28,7 +28,6 @@
 #include <boost/asio.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/regex.hpp>
-#include <boost/test/output_test_stream.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include "network.h"
