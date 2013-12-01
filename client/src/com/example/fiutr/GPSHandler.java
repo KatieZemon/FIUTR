@@ -17,8 +17,8 @@ public class GPSHandler {
 	private String provider;
 	private Criteria gpsCriteria;
 	
-	/*
-	 * 
+	/**
+	 * Constructor to create the GPSHandler
 	 */
 	public GPSHandler(Context subContext)
 	{
@@ -34,7 +34,7 @@ public class GPSHandler {
 				   .setCancelable(false)
 				   
 				   .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-					  /*
+					  /**
 				       * Enables the location settings if the user pressed the "yes" button on the popup dialog
 					   */
 					   public void onClick(@SuppressWarnings("unused") final DialogInterface dialog, @SuppressWarnings("unused") final int id)
@@ -43,8 +43,8 @@ public class GPSHandler {
 					   }
 				   })
 				   .setNegativeButton("No", new DialogInterface.OnClickListener() {
-					   /*
-					   * Closes the popup dialog if the user pressed the "no" button
+					   /**
+					   * Closes the pop-up dialog if the user pressed the "no" button
 					   */
 					   public void onClick(final DialogInterface dialog, @SuppressWarnings("unused") final int id)
 					   {
@@ -58,8 +58,8 @@ public class GPSHandler {
 		provider = locMan.getBestProvider(gpsCriteria, false);
 	}
 	
-	/*
-	 * 
+	/**
+	 * Update the GPS location (latitude and longitude values are updated)
 	 */
 	public boolean updateLocation()
 	{
@@ -73,7 +73,7 @@ public class GPSHandler {
 		else
 			return false;
 	}
-	/*
+	/**
 	 * Returns the GPS latitude
 	 */
 	public double getLat()
@@ -81,7 +81,7 @@ public class GPSHandler {
 		return latitude;
 	}
 	
-	/*
+	/**
 	 * Returns the GPS longitude
 	 */
 	public double getLon()
@@ -89,8 +89,10 @@ public class GPSHandler {
 		return longitude;
 	}
 	
-	/*
-	 * Updates the GPS coordinates
+	/**
+	 * Update the GPS location
+	 * @param lat The latitude value
+	 * @param lon The longitude value
 	 */
 	public void updateLocation(double lat, double lon)
 	{
@@ -98,16 +100,16 @@ public class GPSHandler {
 		longitude = lon;
 	}
 	
-	/*
-	 * 
+	/**
+	 * Disable a particular listener
 	 */
 	public void disable(LocationListener listener)
 	{
 		locMan.removeUpdates(listener);
 	}
 	
-	/*
-	 * 
+	/**
+	 * Enable a particular listener
 	 */
 	public void enable(LocationListener listener)
 	{
