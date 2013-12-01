@@ -1,11 +1,7 @@
-noinst_PROGRAMS = delete-db
+noinst_PROGRAMS = db-manager
 
-AM_CPPFLAGS = \
-	$(DELETE_DB_CFLAGS) \
-	-DLOCALSTATEDIR=\"$(localstatedir)\"
+AM_CPPFLAGS = -DLOCALSTATEDIR=\"$(localstatedir)\"
 
-delete_db_LDADD = $(DELETE_DB_LIBS)
-
-delete_db_SOURCES = delete-db.cc
+db_manager_SOURCES = db-manager.cc
 
 -include $(top_srcdir)/git.mk
