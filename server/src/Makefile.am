@@ -33,7 +33,11 @@ groupgd_SOURCES = \
 	database.h \
 	database.cc
 
-check_PROGRAMS = test-groupgd
+check_PROGRAMS = db-manager test-groupgd
+
+db_manager_CPPFLAGS = -DLOCALSTATEDIR=\"$(localstatedir)\"
+
+db_manager_SOURCES = db-manager.cc
 
 test_groupgd_CPPFLAGS = $(BOOST_CPPFLAGS)
 
@@ -53,6 +57,8 @@ test_groupgd_LDFLAGS = \
 test_groupgd_SOURCES = test-groupgd.cc
 
 check-local: $(check_PROGRAMS)
-	./test-groupgd
+	sudo $(builddir)/db-manager stash
+	$(builddir)/test-groupgd || true
+	sudo $(builddir)/db-manager restore
 
 -include $(top_srcdir)/git.mk
