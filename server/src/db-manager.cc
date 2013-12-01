@@ -28,24 +28,6 @@
 #define DB_BACKUPNAME LOCALSTATEDIR "/groupgd/backup.db"
 
 int
-delete_db()
-{
-  return std::remove(DB_FILENAME);
-}
-
-int
-stash_db()
-{
-  return std::rename(DB_FILENAME, DB_BACKUPNAME);
-}
-
-int
-restore_db()
-{
-  return std::rename(DB_BACKUPNAME, DB_FILENAME);
-}
-
-int
 main(int argc, char* argv[])
 {
   if (argc != 2)
@@ -57,7 +39,7 @@ main(int argc, char* argv[])
 
   if (std::strcmp(argv[1], "delete") == 0)
     {
-      if (delete_db() == -1)
+      if (std::remove(DB_FILENAME) == -1)
         {
           std::perror("delete_db");
           std::exit(1);
@@ -65,7 +47,7 @@ main(int argc, char* argv[])
     }
   else if (std::strcmp(argv[1], "stash") == 0)
     {
-      if (stash_db() == -1)
+      if (std::rename(DB_FILENAME, DB_BACKUPNAME) == -1)
         {
           std::perror("stash_db");
           std::exit(1);
@@ -73,7 +55,7 @@ main(int argc, char* argv[])
     }
   else if (std::strcmp(argv[1], "restore") == 0)
     {
-      if (restore_db() == -1)
+      if (std::rename(DB_BACKUPNAME, DB_FILENAME) == -1)
         {
           std::perror("restore_db");
           std::exit(1);
