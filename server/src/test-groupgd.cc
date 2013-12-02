@@ -54,6 +54,13 @@ receive_networks(boost::asio::ip::tcp::socket* socket)
   return result.get_child("networks");
 }
 
+static boost::property_tree::ptree
+get_networks(boost::asio::ip::tcp::socket* socket)
+{
+  request_networks(socket);
+  return receive_networks(socket);
+}
+
 static void
 add_network(const Network& network, boost::asio::ip::tcp::socket* socket)
 {
@@ -111,32 +118,28 @@ BOOST_FIXTURE_TEST_SUITE(groupgd, Fixture)
 
 BOOST_AUTO_TEST_CASE(get_zero_networks)
 {
-  request_networks(&socket_);
-  auto ptree = receive_networks(&socket_);
+  auto ptree = get_networks(&socket_);
   BOOST_CHECK(ptree.empty());
 }
 
 BOOST_AUTO_TEST_CASE(add_valid_network)
 {
   add_network({"Test", "135", "34.54", "7"}, &socket_);
-  request_networks(&socket_);
-  auto ptree = receive_networks(&socket_);
+  auto ptree = get_networks(&socket_);
   BOOST_CHECK(network_in_ptree({"Test", "135", "34.54", "7"}, ptree));
 }
 
 BOOST_AUTO_TEST_CASE(add_exact_duplicate_network)
 {
   add_network({"Test", "135", "34.54", "7"}, &socket_);
-  request_networks(&socket_);
-  auto ptree = receive_networks(&socket_);
+  auto ptree = get_networks(&socket_);
   BOOST_CHECK(network_in_ptree({"Test", "135", "34.54", "7"}, ptree));
 }
 
 BOOST_AUTO_TEST_CASE(add_network_different_name)
 {
   add_network({"TestTwo", "135", "34.54", "7"}, &socket_);
-  request_networks(&socket_);
-  auto ptree = receive_networks(&socket_);
+  auto ptree = get_networks(&socket_);
   BOOST_CHECK(network_in_ptree({"Test", "135", "34.54", "7"}, ptree));
   BOOST_CHECK(network_in_ptree({"TestTwo", "135", "34.54", "7"}, ptree));
 }
@@ -144,8 +147,7 @@ BOOST_AUTO_TEST_CASE(add_network_different_name)
 BOOST_AUTO_TEST_CASE(add_valid_nearby_network_lower_strength)
 {
   add_network({"Test", "135", "34.540003", "6"}, &socket_);
-  request_networks(&socket_);
-  auto ptree = receive_networks(&socket_);
+  auto ptree = get_networks(&socket_);
   BOOST_CHECK(network_in_ptree({"Test", "135", "34.54", "7"}, ptree));
   BOOST_CHECK(!network_in_ptree({"Test", "135", "34.540003", "6"}, ptree));
 }
@@ -153,8 +155,7 @@ BOOST_AUTO_TEST_CASE(add_valid_nearby_network_lower_strength)
 BOOST_AUTO_TEST_CASE(add_valid_nearby_network_equal_strength)
 {
   add_network({"Test", "135", "34.540003", "7"}, &socket_);
-  request_networks(&socket_);
-  auto ptree = receive_networks(&socket_);
+  auto ptree = get_networks(&socket_);
   // Original network is retained
   BOOST_CHECK(network_in_ptree({"Test", "135", "34.54", "7"}, ptree));
   BOOST_CHECK(!network_in_ptree({"Test", "135", "34.540003", "7"}, ptree));
@@ -163,8 +164,7 @@ BOOST_AUTO_TEST_CASE(add_valid_nearby_network_equal_strength)
 BOOST_AUTO_TEST_CASE(add_valid_nearby_network_higher_strength)
 {
   add_network({"Test", "135", "34.540003", "8"}, &socket_);
-  request_networks(&socket_);
-  auto ptree = receive_networks(&socket_);
+  auto ptree = get_networks(&socket_);
   BOOST_CHECK(!network_in_ptree({"Test", "135", "34.54", "7"}, ptree));
   BOOST_CHECK(network_in_ptree({"Test", "135", "34.540003", "8"}, ptree));
 }
@@ -172,8 +172,7 @@ BOOST_AUTO_TEST_CASE(add_valid_nearby_network_higher_strength)
 BOOST_AUTO_TEST_CASE(add_valid_nearby_network_previous_strength)
 {
   add_network({"Test", "135", "34.54003", "7"}, &socket_);
-  request_networks(&socket_);
-  auto ptree = receive_networks(&socket_);
+  auto ptree = get_networks(&socket_);
   BOOST_CHECK(!network_in_ptree({"Test", "135", "34.54", "7"}, ptree));
   BOOST_CHECK(!network_in_ptree({"Test", "135", "34.540003", "7"}, ptree));
   BOOST_CHECK(network_in_ptree({"Test", "135", "34.540003", "8"}, ptree));
@@ -184,16 +183,14 @@ BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(network_name_includes_whitespace, 1)
 BOOST_AUTO_TEST_CASE(network_name_includes_whitespace)
 {
   add_network({"A Space", "135", "34.54", "7"}, &socket_);
-  request_networks(&socket_);
-  auto ptree = receive_networks(&socket_);
+  auto ptree = get_networks(&socket_);
   BOOST_CHECK(network_in_ptree({"A Space", "135", "34.54", "7"}, ptree));
 }
 
 BOOST_AUTO_TEST_CASE(network_name_includes_arabic)
 {
   add_network({"‎شبكة‎", "135", "34.54", "7"}, &socket_);
-  request_networks(&socket_);
-  auto ptree = receive_networks(&socket_);
+  auto ptree = get_networks(&socket_);
   BOOST_CHECK(network_in_ptree({"‎شبكة‎", "135", "34.54", "7"}, ptree));
 }
 
