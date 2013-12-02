@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include <string>
+#include <unistd.h>
 
 #include <boost/asio.hpp>
 #include <boost/property_tree/ptree.hpp>
@@ -56,6 +57,14 @@ add_network(std::string name, double lat, double lon, float strength,
   std::ostringstream oss;
   oss << "ADD NETWORK " << name << " " << lat
       << " " << lon << " " << strength << "\r\n";
+  boost::asio::write(*socket, boost::asio::buffer(oss.str()));
+}
+
+static void
+send_error(std::string message, boost::asio::ip::tcp::socket* socket)
+{
+  std::ostringstream oss;
+  oss << "ERROR " << message << "\r\n";
   boost::asio::write(*socket, boost::asio::buffer(oss.str()));
 }
 
@@ -111,6 +120,22 @@ BOOST_AUTO_TEST_CASE(add_valid_network)
   request_networks(&socket_);
   auto ptree = receive_networks(&socket_);
   ensure_network_exists(ptree, "Test", 135, 34.54, 7);
+}
+
+BOOST_AUTO_TEST_CASE(error_claim_closes_connection)
+{
+  send_error("This is just a test error", &socket_);
+  try
+    {
+      request_networks(&socket_);
+      // Give the server time close the connection 
+      sleep(2);
+      BOOST_ERROR("Wrote to client, but connection should be closed");
+    }
+  catch (boost::system::system_error& e)
+    {
+      // FIXME verify error code matches something expected
+    }
 }
 
 BOOST_AUTO_TEST_SUITE_END()
