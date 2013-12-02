@@ -29,7 +29,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <sqlite3.h>
 #include <systemd/sd-daemon.h>
@@ -75,10 +74,10 @@ Database::ensure_network_table_exists()
 {
   char* errmsg;
   if (sqlite3_exec(db_, "CREATE TABLE IF NOT EXISTS Networks ("
-                        "name varchar(32), "
-                        "lat real, "
-                        "lon real, "
-                        "strength real);",
+                        "name VARCHAR(32), "
+                        "lat VARCHAR(32), "
+                        "lon VARCHAR(32), "
+                        "strength VARCHAR(32));",
                    NULL, NULL, &errmsg) != SQLITE_OK)
     {
       std::string reason{errmsg};
@@ -106,8 +105,9 @@ Database::add_network(const Network& network)
 
   // FIXME should be a prepared statement to prevent injections
   std::ostringstream oss;
-  oss << "INSERT INTO Networks VALUES ('" << network.name << "', "
-      << network.lat << ", " << network.lon << ", " << network.strength << ");";
+  oss << "INSERT INTO Networks VALUES ('" << network.name << "', '"
+      << network.lat << "', '" << network.lon << "', '" << network.strength
+      << "');";
   char* errmsg = nullptr;
   if (sqlite3_exec(db_, oss.str().c_str(),
                    nullptr, nullptr, &errmsg) != SQLITE_OK)
@@ -124,9 +124,9 @@ Database::remove_network(const Network& network)
 {
   // FIXME should be a prepared statement to prevent injections
   std::ostringstream oss;
-  oss << "DELETE FROM Networks WHERE name='" << network.name << "' AND lat="
-      << network.lat << " AND lon=" << network.lon << " AND strength="
-      << network.strength << ";";
+  oss << "DELETE FROM Networks WHERE name='" << network.name << "' AND lat='"
+      << network.lat << "' AND lon='" << network.lon << "' AND strength='"
+      << network.strength << "';";
   char* errmsg = nullptr;
   if (sqlite3_exec(db_, oss.str().c_str(),
                    nullptr, nullptr, &errmsg) != SQLITE_OK)
@@ -191,11 +191,11 @@ append_network_from_row(void* list, int rows,
         if (std::strcmp(*column_name, "name") == 0)
           network.name = *column_text;
         else if (std::strcmp(*column_name, "lat") == 0)
-          network.lat = boost::lexical_cast<float>(*column_text);
+          network.lat = *column_text;
         else if (std::strcmp(*column_name, "lon") == 0)
-          network.lon = boost::lexical_cast<float>(*column_text);
+          network.lon = *column_text;
         else if (std::strcmp(*column_name, "strength") == 0)
-          network.strength = boost::lexical_cast<float>(*column_text);
+          network.strength = *column_text;
         else
           throw std::runtime_error{
               std::string{"Unexpected column: "} + *column_name};

@@ -23,6 +23,8 @@
 
 #include <cmath>
 
+#include <boost/lexical_cast.hpp>
+
 #include "utility.h"
 
 namespace groupgd {
@@ -30,8 +32,13 @@ namespace groupgd {
 bool
 operator==(Network n1, Network n2)
 {
+  auto lat1 = boost::lexical_cast<double>(n1.lat);
+  auto lat2 = boost::lexical_cast<double>(n2.lat);
+  auto lon1 = boost::lexical_cast<double>(n1.lon);
+  auto lon2 = boost::lexical_cast<double>(n2.lon);
+
   return n1.name == n2.name
-          && ((nearly_equal(n1.lat, n2.lat) && nearly_equal(n1.lon, n2.lon))
+          && ((nearly_equal(lat1, lat2) && nearly_equal(lon1, lon2))
               || distance(n1, n2) <= IDENTICAL_NETWORK_METERS);
 }
 
@@ -53,9 +60,14 @@ float
 distance(Network n1, Network n2)
 {
   const static int EQUATORIAL_RADIUS = 6378137;
-  return 2 * EQUATORIAL_RADIUS * std::asin(std::sqrt(
-      haversin(n2.lat-n1.lat)
-      + std::cos(n1.lat)*std::cos(n2.lat)*haversin(n2.lon-n1.lon)));
+
+  auto lat1 = boost::lexical_cast<double>(n1.lat);
+  auto lat2 = boost::lexical_cast<double>(n2.lat);
+  auto lon1 = boost::lexical_cast<double>(n1.lon);
+  auto lon2 = boost::lexical_cast<double>(n2.lon);
+
+  return 2 * EQUATORIAL_RADIUS * std::asin(std::sqrt(haversin(lat2-lat1)
+      + std::cos(lat1)*std::cos(lat2)*haversin(lon2-lon1)));
 }
 
 }

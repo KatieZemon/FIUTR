@@ -31,9 +31,9 @@ const int IDENTICAL_NETWORK_METERS = 40;
 struct Network
 {
   std::string name;
-  float lat;
-  float lon;
-  float strength;
+  std::string lat;
+  std::string lon;
+  std::string strength;
 };
 
 // Equivalent if very close and have same SSID

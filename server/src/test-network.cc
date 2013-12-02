@@ -35,16 +35,14 @@ BOOST_AUTO_TEST_SUITE(network_cc)
 
 BOOST_AUTO_TEST_CASE(nearby_networks_different_ssids)
 {
-  Network n1 = {"n1", 42, 69.000000, 13};
-  Network n2 = {"n2", 42, 69.000010, 13};
-  BOOST_CHECK_EQUAL(n1.lon == n2.lon, false);
+  Network n1 = {"n1", "42", "69.000000", "13"};
+  Network n2 = {"n2", "42", "69.000010", "13"};
   BOOST_CHECK_EQUAL(distance(n1, n2) <= IDENTICAL_NETWORK_METERS, true);
   BOOST_CHECK_EQUAL(n1 == n2, false);
   BOOST_CHECK_EQUAL(n1 != n2, true);
 
-  Network n3 = {"n3", 135, 34.540000, 7};
-  Network n4 = {"n4", 135, 34.540003, 7};
-  BOOST_CHECK_EQUAL(n3.lon == n4.lon, false);
+  Network n3 = {"n3", "135", "34.540000", "7"};
+  Network n4 = {"n4", "135", "34.540003", "7"};
   BOOST_CHECK_EQUAL(distance(n3, n4) <= IDENTICAL_NETWORK_METERS, true);
   BOOST_CHECK_EQUAL(n3 == n4, false);
   BOOST_CHECK_EQUAL(n3 != n4, true);
@@ -52,16 +50,14 @@ BOOST_AUTO_TEST_CASE(nearby_networks_different_ssids)
 
 BOOST_AUTO_TEST_CASE(nearby_networks_identical_ssids)
 {
-  Network n1 = {"network", 42, 69.000000, 13};
-  Network n2 = {"network", 42, 69.000010, 13};
-  BOOST_CHECK_EQUAL(n1.lon == n2.lon, false);
+  Network n1 = {"network", "42", "69.000000", "13"};
+  Network n2 = {"network", "42", "69.000010", "13"};
   BOOST_CHECK_EQUAL(distance(n1, n2) <= IDENTICAL_NETWORK_METERS, true);
   BOOST_CHECK_EQUAL(n1 == n2, true);
   BOOST_CHECK_EQUAL(n1 != n2, false);
 
-  Network n3 = {"Test", 135, 34.540000, 7};
-  Network n4 = {"Test", 135, 34.540003, 7};
-  BOOST_CHECK_EQUAL(n3.lon == n4.lon, false);
+  Network n3 = {"Test", "135", "34.540000", "7"};
+  Network n4 = {"Test", "135", "34.540003", "7"};
   BOOST_CHECK_EQUAL(distance(n3, n4) <= IDENTICAL_NETWORK_METERS, true);
   BOOST_CHECK_EQUAL(n3 == n4, true);
   BOOST_CHECK_EQUAL(n3 != n4, false);
@@ -69,9 +65,8 @@ BOOST_AUTO_TEST_CASE(nearby_networks_identical_ssids)
 
 BOOST_AUTO_TEST_CASE(identical_ssids_not_nearby)
 {
-  Network n1 = {"network", 42, 69.000, 13};
-  Network n2 = {"network", 42, 69.001, 13};
-  BOOST_CHECK_EQUAL(n1.lon == n2.lon, false);
+  Network n1 = {"network", "42", "69.000", "13"};
+  Network n2 = {"network", "42", "69.001", "13"};
   BOOST_CHECK_EQUAL(distance(n1, n2) <= IDENTICAL_NETWORK_METERS, false);
   BOOST_CHECK_EQUAL(n1 == n2, false);
   BOOST_CHECK_EQUAL(n1 != n2, true);

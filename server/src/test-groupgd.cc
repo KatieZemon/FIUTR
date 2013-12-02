@@ -26,6 +26,7 @@
 #include <string>
 
 #include <boost/asio.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/regex.hpp>
 #include <boost/test/unit_test.hpp>
@@ -72,12 +73,15 @@ ensure_network_exists(const Network& needle,
     {
       auto network = pair.second;
       if (network.get<std::string>("name") == needle.name
-          && nearly_equal(network.get<float>("lat"), needle.lat)
-          && nearly_equal(network.get<float>("lon"), needle.lon)
-          && nearly_equal(network.get<float>("strength"), needle.strength))
+          && nearly_equal(network.get<double>("lat"),
+                          boost::lexical_cast<double>(needle.lat))
+          && nearly_equal(network.get<double>("lon"),
+                          boost::lexical_cast<double>(needle.lon))
+          && nearly_equal(network.get<double>("strength"),
+                          boost::lexical_cast<double>(needle.strength)))
         return;
     }
-  BOOST_ERROR("Valid network not found in database");
+  BOOST_ERROR("Identical network not found in database");
 }
 
 struct Fixture
@@ -110,10 +114,10 @@ BOOST_AUTO_TEST_CASE(get_zero_networks)
 
 BOOST_AUTO_TEST_CASE(add_valid_network)
 {
-  add_network({"Test", 135, 34.54, 7}, &socket_);
+  add_network({"Test", "135", "34.54", "7"}, &socket_);
   request_networks(&socket_);
   auto ptree = receive_networks(&socket_);
-  ensure_network_exists({"Test", 135, 34.54, 7}, ptree);
+  ensure_network_exists({"Test", "135", "34.54", "7"}, ptree);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
