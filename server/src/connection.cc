@@ -42,6 +42,8 @@ Connection::Connection(boost::asio::io_service* io_service)
 
 Connection::~Connection()
 {
+  safe_journal(SD_DEBUG, "Client "
+      + socket_.remote_endpoint().address().to_string() + " disconnected");
   try
   {
     stop();
