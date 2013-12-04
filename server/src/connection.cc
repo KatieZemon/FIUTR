@@ -77,8 +77,11 @@ void
 Connection::on_deadline_timer_expired(const boost::system::error_code& ec)
 {
   if (ec == boost::asio::error::operation_aborted)
-    return;
-
+    {
+      safe_journal(SD_DEBUG, "Client "
+          + socket_.remote_endpoint().address().to_string() + " timed out");
+      return;
+    }
   deadline_timer_.async_wait(std::bind(&Connection::on_deadline_timer_expired,
                                        shared_from_this(),
                                        std::placeholders::_1));
