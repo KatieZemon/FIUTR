@@ -80,6 +80,7 @@ public class MainActivity extends Activity implements LocationListener
 		switch (item.getItemId()) {
 		case R.id.action_search:
 			intent = new Intent(this, SearchActivity.class);
+			intent.putExtra("FILE_PATH",filePath);
 			startActivity(intent);
 			return true;
 		case R.id.action_scan:

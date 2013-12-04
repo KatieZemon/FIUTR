@@ -1,6 +1,7 @@
 package com.example.fiutr;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,6 +34,9 @@ public class SearchActivity extends Activity {
 	// Search button
 	private Button searchButton;
 	
+	// File to send to the intent
+	private String filePath;
+	
 	/**
 	 * Method automatically called when the SearchActivity page is created.
 	 * It initializes the seekbars (and values of seekBars according to what has been
@@ -42,6 +46,12 @@ public class SearchActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_search);
+		
+		Bundle extras = getIntent().getExtras();
+		if(extras != null)
+		{
+			filePath = extras.getString("FILE_PATH");
+		}
 
 		SharedPreferences customSharedPreference = getSharedPreferences("myCustomSharedPrefs", Activity.MODE_PRIVATE);
 
@@ -78,6 +88,9 @@ public class SearchActivity extends Activity {
 			 */
 			public void onClick(View v) {
 				savePreferences();
+				Intent intent = new Intent(SearchActivity.this, ViewAllActivity.class);
+				intent.putExtra("FILE_PATH",filePath);
+				startActivity(intent);
 				finish();
 			}
 		});
