@@ -10,6 +10,7 @@
     <string name="action_viewAll">View All</string>
     <string name="action_about">About</string>
     <string name="action_refresh">Refresh</string>
+    <string name="action_start">Start</string>
     
     <string name="mapHereText">Map goes here</string>
     <string name="aboutInfo">
