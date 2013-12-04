@@ -2,12 +2,19 @@ package com.example.fiutr;
 import java.util.ArrayList;
 
 import android.app.ListActivity;
+import android.content.Context;
 import android.net.wifi.ScanResult;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.util.Log;
 import android.view.*;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 import android.support.v4.app.NavUtils;
 
 /**
@@ -22,7 +29,69 @@ public class ScanActivity extends ListActivity
 	ArrayList<LocationNetwork> gpsWireless = new ArrayList<LocationNetwork>();
 	WifiAdapterItem adapter;
 	Button connectButton;
+	ToggleButton continuousConnectionButton;
+	private AsyncTimer timer;
 
+	 private void startThread()
+		{
+		    Toast.makeText(ScanActivity.this,"Scanning for networks",Toast.LENGTH_SHORT).show();
+			timer = new AsyncTimer(); // need to make this every time because it can only be executed once
+			timer.execute(); // start the thread
+		}
+		private void stopThread()
+		{
+		  timer.cancel(true);
+		  Toast.makeText(ScanActivity.this,"Done scanning for networks",Toast.LENGTH_SHORT).show();
+		}
+		
+		/**
+		* This class is used for implementing a continuous 
+		* scan whenever the continuous scan button is pressed
+		*/
+		public class AsyncTimer extends AsyncTask<Void,Integer,Boolean>{
+			    private boolean isRunning;
+			    private boolean stop;
+			    
+			    @Override
+			    protected Boolean doInBackground(Void... arg0) {
+			        isRunning = true;
+
+			        while(isRunning)
+			        {
+			            try {
+			                Thread.sleep(3000);
+			            } catch (InterruptedException e) {
+			                Log.e("Thread Interrupted", e.getMessage());
+			            }
+			            runOnUiThread(new Runnable() {
+	                        @Override
+	                        public void run() {
+	                           onUpdate();
+	                        }
+	                    });
+			        }
+			        if(stop==false)
+			            return true;
+			        else
+			            return false;
+			    }
+
+			    @Override
+			    protected void onCancelled() {
+			        stop = true;
+			        isRunning = false;
+			    }
+			
+			    public boolean getIsRunning()			
+			    {			
+			        return isRunning;			
+			    }
+			
+			   		 
+			
+			}
+
+		
 	/**
 	 * Method automatically called when the ScanActivity page is created.
 	 * It creates a new GPSHandler and wifiHandler in order to display the map
@@ -49,6 +118,9 @@ public class ScanActivity extends ListActivity
 		setListAdapter(adapter);
 		
 		connectButton = (Button) findViewById(R.id.connectButton);
+		continuousConnectionButton = (ToggleButton)findViewById(R.id.togglebutton);
+		
+		
 		/**
 		 * This is the listener for the connect button.
 		 * It iterates through all networks resulting from the scan and it
@@ -76,13 +148,46 @@ public class ScanActivity extends ListActivity
 				{
 					tester.connectToNetwork(result.get(i));
 				}
+				if (result.size() == 0)
+				{
+					Toast.makeText(ScanActivity.this,"No networks were selected!",Toast.LENGTH_SHORT).show();
+				}
+				else
+				{
+					Toast.makeText(ScanActivity.this,"Connecting to network",Toast.LENGTH_SHORT).show();
+				}
 			}}	
 		);
+		
+		
+		/**
+		 * This is the listener for the toggle button
+		 */
+		continuousConnectionButton.setOnClickListener( new OnClickListener()	
+		{
+			@Override
+			public void onClick(final View v) {
+			    // Is the toggle on?
+			    boolean on = ((ToggleButton) v).isChecked();
+			   
+			   
+			    if (on) {			    	
+			    	startThread();
+			    }
+			    else {
+			    	stopThread();
+			    }
+			}
+		}
+		);
+		
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 		{
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 	}
+	
+	
 	
 	/**
 	 * This method will rescan for all local networks and display
@@ -90,6 +195,7 @@ public class ScanActivity extends ListActivity
 	 */
 	public void onUpdate()
 	{
+		//Toast.makeText(this, "on Update called", Toast.LENGTH_SHORT).show();
 		// Store a list of all local networks
 		currentNetworks = tester.getWifiNetworks();
 		ArrayList<ScanResult> currentNetworks = tester.getWifiNetworks();
@@ -139,6 +245,8 @@ public class ScanActivity extends ListActivity
 		else
 			return super.onOptionsItemSelected(item);		
 	}	
-}
 
+
+
+}
 

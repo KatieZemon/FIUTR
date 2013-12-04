@@ -37,7 +37,7 @@ public class MainActivity extends Activity implements LocationListener
 	private WiFiHandler wifiHandler;
 	private final ArrayList<LocationNetwork> wifiGPS = new ArrayList<LocationNetwork>();
 	private final ArrayList<Marker> markerList = new ArrayList<Marker>();
-	private String filePath;
+	private static String filePath;
 	private String fileName = "gpsmaps.txt";
 	private FileOutputStream writer;
 	
@@ -80,6 +80,7 @@ public class MainActivity extends Activity implements LocationListener
 		switch (item.getItemId()) {
 		case R.id.action_search:
 			intent = new Intent(this, SearchActivity.class);
+			intent.putExtra("FILE_PATH",filePath);
 			startActivity(intent);
 			return true;
 		case R.id.action_scan:
@@ -89,6 +90,7 @@ public class MainActivity extends Activity implements LocationListener
 		case R.id.action_viewAll:
 			intent = new Intent(this, ViewAllActivity.class);
 			intent.putExtra("FILE_PATH",filePath);
+			intent.putExtra("BOOL_VIEW_ALL",true); // Viewing all data
 			startActivity(intent);
 			return true;
 		case R.id.action_about:
@@ -226,7 +228,8 @@ public class MainActivity extends Activity implements LocationListener
 		googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos));
 	}
 	
-	public void checkFileForDuplicates()
+	// Remove duplicate files displayed in viewall activity
+	public static void checkFileForDuplicates()
 	{
 		try
 		{

@@ -1,6 +1,7 @@
 package com.example.fiutr;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,9 +22,9 @@ import android.support.v4.app.NavUtils;
 public class SearchActivity extends Activity {
 
 	// SeekBars for setting preferences
-	private SeekBar prefDistSeekbar; // Seekbar for setting the distance
-	private SeekBar prefSignalSeekbar; // Seekbar for setting the minimal signal strength
-	private SeekBar prefResultsSeekbar; // Seekbar for setting the maximum number of results returned
+	private static SeekBar prefDistSeekbar; // Seekbar for setting the distance
+	private static SeekBar prefSignalSeekbar; // Seekbar for setting the minimal signal strength
+	private static SeekBar prefResultsSeekbar; // Seekbar for setting the maximum number of results returned
 	
 	// Values of our preferences
 	private TextView prefDistVal; // The maximum distance away from the user's current location
@@ -32,6 +33,9 @@ public class SearchActivity extends Activity {
 	
 	// Search button
 	private Button searchButton;
+	
+	// File to send to the intent
+	private String filePath;
 	
 	/**
 	 * Method automatically called when the SearchActivity page is created.
@@ -42,6 +46,12 @@ public class SearchActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_search);
+		
+		Bundle extras = getIntent().getExtras();
+		if(extras != null)
+		{
+			filePath = extras.getString("FILE_PATH");
+		}
 
 		SharedPreferences customSharedPreference = getSharedPreferences("myCustomSharedPrefs", Activity.MODE_PRIVATE);
 
@@ -78,6 +88,10 @@ public class SearchActivity extends Activity {
 			 */
 			public void onClick(View v) {
 				savePreferences();
+				Intent intent = new Intent(SearchActivity.this, ViewAllActivity.class);
+				intent.putExtra("FILE_PATH",filePath);
+				intent.putExtra("BOOL_VIEW_ALL",false); // Viewing only data pertaining to search results
+				startActivity(intent);
 				finish();
 			}
 		});
@@ -126,6 +140,20 @@ public class SearchActivity extends Activity {
 		}
 
 		return super.onOptionsItemSelected(item);
+	}
+	
+	public static int getDistance()
+	{
+		return prefDistSeekbar.getProgress();
+	}
+	
+	public static int getSignalStrength()
+	{
+		return prefSignalSeekbar.getProgress();
+	}
+	public static int getNumResults()
+	{
+		return prefResultsSeekbar.getProgress();
 	}
 
 	/**
