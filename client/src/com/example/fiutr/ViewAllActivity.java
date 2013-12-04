@@ -1,14 +1,22 @@
 package com.example.fiutr;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import android.app.ListActivity;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 /**
  * ViewAllActivity creates a page which displays a list of networks. This is used for viewing
@@ -38,6 +46,7 @@ public class ViewAllActivity extends ListActivity {
 			filePath = extras.getString("FILE_PATH");
 		}
 		
+		checkFileForDuplicates();
 		getData();
 		adapter = new NetworkAdapterItem(this, R.layout.list_viewall, networkList);
 		setListAdapter(adapter);
@@ -48,6 +57,48 @@ public class ViewAllActivity extends ListActivity {
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			// Show the Up button in the action bar.
 			getActionBar().setDisplayHomeAsUpEnabled(true);
+		}
+	}
+	public void checkFileForDuplicates()
+	{
+		 Toast.makeText(this,"Path" + filePath,Toast.LENGTH_SHORT).show();
+		try
+		{
+			BufferedReader reader = new BufferedReader(new FileReader(filePath));
+			Set<String> lines = new LinkedHashSet<String>(10000);
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				lines.add(line);
+			}
+			reader.close();
+			BufferedWriter tempWriter = new BufferedWriter(new FileWriter(filePath));
+			for(String uniqueLines : lines)
+			{
+				tempWriter.write(uniqueLines);
+				tempWriter.newLine();
+			}
+			tempWriter.close();
+		}
+		catch (FileNotFoundException e)
+		{
+			try
+			{
+				System.err.println("Creating a new file!\n");
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
+				writer.close();
+				checkFileForDuplicates();
+			}
+			catch (Exception f)
+			{
+				f.printStackTrace();
+			}
+			
+		}
+		catch (Exception e)
+		{
+			System.err.println("Unable to check file for duplicates!\n");
+			e.printStackTrace();
 		}
 	}
 

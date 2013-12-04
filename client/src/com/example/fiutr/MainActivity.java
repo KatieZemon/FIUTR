@@ -37,7 +37,7 @@ public class MainActivity extends Activity implements LocationListener
 	private WiFiHandler wifiHandler;
 	private final ArrayList<LocationNetwork> wifiGPS = new ArrayList<LocationNetwork>();
 	private final ArrayList<Marker> markerList = new ArrayList<Marker>();
-	private String filePath;
+	private static String filePath;
 	private String fileName = "gpsmaps.txt";
 	private FileOutputStream writer;
 	
@@ -226,7 +226,8 @@ public class MainActivity extends Activity implements LocationListener
 		googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos));
 	}
 	
-	public void checkFileForDuplicates()
+	// Remove duplicate files displayed in viewall activity
+	public static void checkFileForDuplicates()
 	{
 		try
 		{

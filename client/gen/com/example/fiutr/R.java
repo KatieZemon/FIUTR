@@ -210,13 +210,14 @@ containing a value of this type.
         public static final int ic_plusone_tall_off_client=0x7f02001c;
     }
     public static final class id {
-        public static final int action_about=0x7f050019;
-        public static final int action_refresh=0x7f05001a;
-        public static final int action_scan=0x7f050017;
-        public static final int action_search=0x7f050016;
-        public static final int action_viewAll=0x7f050018;
+        public static final int action_about=0x7f05001a;
+        public static final int action_refresh=0x7f05001b;
+        public static final int action_scan=0x7f050018;
+        public static final int action_search=0x7f050017;
+        public static final int action_viewAll=0x7f050019;
         public static final int checkbox=0x7f050014;
         public static final int connectButton=0x7f050008;
+        public static final int description=0x7f050016;
         public static final int hybrid=0x7f050004;
         public static final int mainText=0x7f050013;
         public static final int map=0x7f050005;
@@ -250,6 +251,7 @@ containing a value of this type.
         public static final int activity_viewall=0x7f030005;
         public static final int activity_wifi=0x7f030006;
         public static final int list_networks=0x7f030007;
+        public static final int list_viewall=0x7f030008;
     }
     public static final class menu {
         public static final int main=0x7f0a0000;
