@@ -72,6 +72,11 @@ public class ViewAllActivity extends ListActivity {
 	 */
 	public void getData()
 	{
+		int distance = SearchActivity.getDistance();
+		int signalStrength = SearchActivity.getSignalStrength();
+		int numResults = SearchActivity.getNumResults();
+		int listedResults = 0; // keep track of total results listed
+		
 		try
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(filePath));
@@ -93,11 +98,17 @@ public class ViewAllActivity extends ListActivity {
 					// View only data pertaining to search result
 					else
 					{
-						// If prefDistSeekbar.getProgress()
-						int distance = SearchActivity.getDistance();
-						//int 
+						if (distance > 20 // Get network distance
+								&& signalStrength > 4 // get network strength
+								&& numResults > listedResults)
+						{
+							
+							networkList.add(new Network(parsedLine[0], parsedLine[1], Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3])));
+							listedResults++; // increment total number of results added to list
+						}
 					}
 				}
+				
 				else
 				{
 					System.out.println("Caught blankspace!");
