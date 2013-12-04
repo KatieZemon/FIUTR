@@ -20,8 +20,6 @@ PKG_CHECK_MODULES(GROUPGD, [
   sqlite3 >= 3.3
 ])
 
-PKG_CHECK_MODULES(DELETE_DB, [sqlite3])
-
 BOOST_REQUIRE([1.53], [
   AC_MSG_ERROR([Boost is required])
 ])
@@ -35,7 +33,6 @@ AC_CONFIG_FILES([
   Makefile
   data/Makefile
   src/Makefile
-  tools/Makefile
 ])
 
 AC_OUTPUT

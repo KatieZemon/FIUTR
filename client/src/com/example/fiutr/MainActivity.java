@@ -1,13 +1,24 @@
 package com.example.fiutr;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.location.*;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,34 +27,36 @@ import android.widget.Toast;
 import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 
-/**
- * MainActivity serves as the home page for the application. It
- * contains the map which shows the user's location and surrounding WiFi points
- * stored in our database.
- */
-public class MainActivity extends Activity implements LocationListener{	
+
+public class MainActivity extends Activity implements LocationListener
+{
+	
 	private GoogleMap googleMap;
 	private CameraPosition camPos;
 	private GPSHandler gpsHandler;
 	private WiFiHandler wifiHandler;
 	private final ArrayList<LocationNetwork> wifiGPS = new ArrayList<LocationNetwork>();
 	private final ArrayList<Marker> markerList = new ArrayList<Marker>();
+	private String filePath;
+	private String fileName = "gpsmaps.txt";
+	private FileOutputStream writer;
 	
-	/**
-	 * Method automatically called when the MainActivity page is created.
-	 * It creates a new GPSHandler and wifiHandler in order to display the map
-	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		filePath = getFilesDir().toString()+"/gpsmaps.txt";
+		System.out.println("The file path is: "+filePath);
 		gpsHandler = new GPSHandler(this);
 		wifiHandler = new WiFiHandler(this);
-		gpsHandler.updateLocation();  
+		gpsHandler.updateLocation();
 
 		try
 		{
+			checkFileForDuplicates();
 			initializeMap();
+			parseFile();
+			openFile();
 		}
 		catch(Exception e)
 		{
@@ -51,70 +64,66 @@ public class MainActivity extends Activity implements LocationListener{
 		}
 	}
 
-	/**
-	 * Adds all of our options to the main menu
-	 */
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
+	public boolean onCreateOptionsMenu(Menu menu) 
+	{
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 	
-	/**
-	 * This is the default method called when the user selects one of the
-	 * menu options. It will open a new page based on the selected option.
-	 */
 	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
+	public boolean onOptionsItemSelected(MenuItem item) 
+	{
 		Intent intent;
-		int itemId = item.getItemId();
-		if (itemId == R.id.action_search) {
+		// Handle presses on the action bar items
+		switch (item.getItemId()) {
+		case R.id.action_search:
 			intent = new Intent(this, SearchActivity.class);
 			startActivity(intent);
 			return true;
-		} else if (itemId == R.id.action_scan) {
+		case R.id.action_scan:
 			intent = new Intent(this, ScanActivity.class);
 			startActivity(intent);
 			return true;
-		} else if (itemId == R.id.action_viewAll) {
+		case R.id.action_viewAll:
 			intent = new Intent(this, ViewAllActivity.class);
+			intent.putExtra("FILE_PATH",filePath);
 			startActivity(intent);
 			return true;
-		} else if (itemId == R.id.action_about) {
+		case R.id.action_about:
 			intent = new Intent(this, AboutActivity.class);
 			startActivity(intent);
 			return true;
-		} else {
+		default:
 			return super.onOptionsItemSelected(item);
 		}
 
 	}
 	
-	/**
-	 * 
-	 */
 	@Override
 	protected void onPause()
 	{
 		super.onPause();
 		gpsHandler.disable(this);
+		// Close File IO
+		
+		try {
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 	
-	/**
-	 * 
-	 */
 	@Override
 	protected void onResume()
 	{
 		super.onResume();
 		gpsHandler.enable(this);
 		updateMap();
+		openFile();
 	}
 	
-	/**
-	 * initializes the map with a marker at the user's location
-	 */
 	private void initializeMap()
 	{
 		if(googleMap == null)
@@ -127,12 +136,6 @@ public class MainActivity extends Activity implements LocationListener{
 			Toast.makeText(getApplicationContext(), "Unable to create maps!", Toast.LENGTH_SHORT).show();
 		}
 	}
-	
-	/**
-	 * Updates the map with the user's current location. It removes the marker placed at the user's
-	 * old location, gets the users current location, and places a new marker at that current location.
-	 * If the current location was unable to be found, an error message will be displayed
-	 */
 	private void updateMap()
 	{
 		if(gpsHandler.updateLocation())
@@ -146,19 +149,12 @@ public class MainActivity extends Activity implements LocationListener{
 			addMarker("Current Location", new LatLng(gpsHandler.getLat(),gpsHandler.getLon()));
 			processWiFiLocations(wifiHandler.getWifiNetworks(),gpsHandler.getLat(), gpsHandler.getLon());
 		}
-		
-		// Write an error message if the user's current GPS location was not found
 		else
 		{
 			Toast.makeText(this, "Unable to update GPS Position!", Toast.LENGTH_SHORT).show();
 		}
 	}
 	
-	/**
-	 * Updates the map with the user's current location. It removes the marker placed at the user's
-	 * old location, gets the users current location, and places a new marker at that current location.
-	 * If the current location was unable to be found, an error message will be displayed
-	 */
 	public void processWiFiLocations(List<ScanResult> wifiNetworks, double latitude, double longitude)
 	{
 		for(ScanResult result : wifiNetworks)
@@ -171,11 +167,6 @@ public class MainActivity extends Activity implements LocationListener{
 		}
 	}
 	
-	/**
-	 * Adds a new marker to the map
-	 * @param title The title to be displayed above the marker's position on the map
-	 * @param loc The latitude/longitude values of the marker's location
-	 */
 	public void addMarker(String title, LatLng loc)
 	{
 		Marker marker = googleMap.addMarker(new MarkerOptions()
@@ -185,27 +176,33 @@ public class MainActivity extends Activity implements LocationListener{
 		markerList.add(marker);
 	}
 	
-	/**
-	 * Adds a new marker to the map based on results from performing a scan
-	 * @param result The result from performing a scan. result.SSID will be used to set the title
-	 *        of the marker
-	 * @param loc The latitude/longitude values of the marker's location
-	 */
 	public void addMarker(ScanResult result, LatLng loc)
 	{
+		
 		Marker marker = googleMap.addMarker(new MarkerOptions()
 								 .position(loc)
 								 .title(result.SSID)
 								 .snippet(result.toString())
 								 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-		markerList.add(marker);	
+		if(!markerList.contains(marker))
+		{
+			markerList.add(marker);
+			writeToFile(result, loc);
+		}
+		
 	}
 	
-	/**
-	 * Removes a marker from the map. The marker is specified by its unique title.
-	 * @param title The marker's title which can be represented as the SSID of a specific network
-	 *        to be removed from the map 
-	 */
+	public void addMarker(String nameOfNetwork, String info, LatLng loc)
+	{
+		Marker marker = googleMap.addMarker(new MarkerOptions()
+								 .position(loc)
+								 .title(nameOfNetwork)
+								 .snippet(info)
+								 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
+		if(!markerList.contains(marker))
+			markerList.add(marker);
+	}
+	
 	public void removeMarker(String title)
 	{
 		Iterator<Marker> i = markerList.iterator();
@@ -219,10 +216,6 @@ public class MainActivity extends Activity implements LocationListener{
 		}
 	}
 	
-	/**
-	 * Method automatically called to get the location of the user
-	 * and zoom in on that location 
-	 */
 	@Override
 	public void onLocationChanged(Location location)
 	{
@@ -233,21 +226,164 @@ public class MainActivity extends Activity implements LocationListener{
 		googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos));
 	}
 	
-	// TODO: Remove?
+	public void checkFileForDuplicates()
+	{
+		try
+		{
+			BufferedReader reader = new BufferedReader(new FileReader(filePath));
+			Set<String> lines = new LinkedHashSet<String>(10000);
+			String line;
+			while ((line = reader.readLine()) != null)
+			{
+				lines.add(line);
+			}
+			reader.close();
+			BufferedWriter tempWriter = new BufferedWriter(new FileWriter(filePath));
+			for(String uniqueLines : lines)
+			{
+				tempWriter.write(uniqueLines);
+				tempWriter.newLine();
+			}
+			tempWriter.close();
+		}
+		catch (FileNotFoundException e)
+		{
+			try
+			{
+				System.err.println("Creating a new file!\n");
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
+				writer.close();
+				checkFileForDuplicates();
+			}
+			catch (Exception f)
+			{
+				f.printStackTrace();
+			}
+			
+		}
+		catch (Exception e)
+		{
+			System.err.println("Unable to check file for duplicates!\n");
+			e.printStackTrace();
+		}
+	}
+	
+	public void parseFile()
+	{
+		try
+		{
+			BufferedReader reader = new BufferedReader(new FileReader(filePath));
+			String line;
+			while((line = reader.readLine()) != null)
+			{
+				if(line.contains("|"))
+				{
+					System.out.println("Parsing line: [ "+line+" ]");
+					// Format is: NAMEOFNETWORK|INFO_OF_NETWORK|LATITUDE|LONGITUDE
+					String[] parsedLine = line.split("\\|");
+					for(String s : parsedLine)
+						System.out.println(s);
+					addMarker(parsedLine[0],parsedLine[1],new LatLng(Double.parseDouble(parsedLine[2]),Double.parseDouble(parsedLine[3])));
+				}
+				else
+					System.out.println("Caught newline!");
+			}
+			reader.close();
+		}
+		catch (FileNotFoundException e)
+		{
+			try
+			{
+				System.err.println("Creating a new file!\n");
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
+				writer.close();
+				parseFile();
+			}
+			catch (Exception f)
+			{
+				f.printStackTrace();
+			}
+			
+		}
+		catch (Exception e)
+		{
+			System.err.println("Unable to parse file for networks!\n");
+			e.printStackTrace();
+		}
+	}
+	
+	public void writeToFile(ScanResult result, LatLng loc)
+	{
+		// FORMAT is: NAMEOFNETWORK|INFO_OF_NETWORK|LATITUDE|LONGITUDE
+		if(writer == null)
+			openFile();
+		try
+		{
+			writer.write((result.SSID+"|"+result.level+"|"+loc.latitude+"|"+loc.longitude).getBytes());
+			writer.write(System.getProperty("line.separator").getBytes());
+		}
+		catch (FileNotFoundException e)
+		{
+			try
+			{
+				System.err.println("Creating a new file!\n");
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
+				writer.close();
+				writeToFile(result,loc);
+			}
+			catch (Exception f)
+			{
+				f.printStackTrace();
+			}
+			
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
+	public void openFile()
+	{
+		if(writer != null)
+			return;
+		try
+		{
+			writer = openFileOutput(fileName, Context.MODE_APPEND);
+		}
+		catch (FileNotFoundException e)
+		{
+			try
+			{
+				System.err.println("Creating a new file!\n");
+				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
+				writer.close();
+				openFile();
+			}
+			catch (Exception f)
+			{
+				f.printStackTrace();
+			}
+			
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+	
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras)
 	{
 		
 	}
 	
-	// TODO: Remove?
 	@Override
 	public void onProviderEnabled(String provider)
 	{
 		
 	}
 	
-	// TODO: Remove?
 	@Override
 	public void onProviderDisabled(String provider)
 	{

@@ -1,4 +1,4 @@
-SUBDIRS = data src tools
+SUBDIRS = data src
 
 ACLOCAL_AMFLAGS = -I m4
 

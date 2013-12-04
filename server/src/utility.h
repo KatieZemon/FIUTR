@@ -39,6 +39,9 @@ read_all_from_streambuf(std::streambuf* streambuf);
 boost::property_tree::ptree
 streambuf_to_ptree(std::streambuf* streambuf);
 
+std::string
+ptree_to_string(const boost::property_tree::ptree& ptree);
+
 void
 safe_journal(const char* priority, std::string message);
 
@@ -47,7 +50,7 @@ template <typename T>
   bool
   nearly_equal(T a, T b)
   {
-    return std::fabs(a - b) < 0.0001;
+    return std::fabs(a - b) < 0.000001;
   }
 
 }

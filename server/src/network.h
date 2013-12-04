@@ -26,13 +26,24 @@
 
 namespace groupgd {
 
+const int IDENTICAL_NETWORK_METERS = 40;
+
 struct Network
 {
   std::string name;
-  double lat;
-  double lon;
-  float strength;
+  std::string lat;
+  std::string lon;
+  std::string strength;
 };
+
+// Equivalent if very close and have same SSID
+bool
+operator==(Network n1, Network n2);
+
+bool operator!=(Network n1, Network n2);
+
+float
+distance(Network n1, Network n2);
 
 }
 
