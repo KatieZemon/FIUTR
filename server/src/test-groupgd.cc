@@ -179,6 +179,7 @@ BOOST_AUTO_TEST_CASE(add_valid_nearby_network_previous_strength)
 }
 
 // https://github.com/ktacos/FIUTR/issues/17
+// Should also test to make sure network names can contain null characters.
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(network_name_includes_whitespace, 1)
 BOOST_AUTO_TEST_CASE(network_name_includes_whitespace)
 {
@@ -193,6 +194,15 @@ BOOST_AUTO_TEST_CASE(network_name_includes_arabic)
   auto ptree = get_networks(&socket_);
   BOOST_CHECK(network_in_ptree({"‎شبكة‎", "135", "34.54", "7"}, ptree));
 }
+/*
+BOOST_AUTO_TEST_CASE(one_connection_multiple_requests)
+{
+  add_network({"Gary", "135", "34.54", "7"}, &socket_);
+  add_network({"Leanne", "120", "53", "94.4"}, &socket_);
+  auto ptree = get_networks(&socket_);
+  BOOST_CHECK(network_in_ptree({"Gary", "135", "34.54", "7"}, ptree));
+  BOOST_CHECK(network_in_ptree({"Leanne", "120", "53", "94.4"}, ptree));
+}*/
 
 BOOST_AUTO_TEST_SUITE_END()
 
