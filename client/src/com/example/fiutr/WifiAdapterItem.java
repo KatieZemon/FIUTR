@@ -2,6 +2,8 @@ package com.example.fiutr;
 
 import java.util.ArrayList;
 
+import com.google.android.gms.maps.model.Marker;
+
 import android.content.Context;
 import android.util.SparseBooleanArray;
 import android.view.*;
