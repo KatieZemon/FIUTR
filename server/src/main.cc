@@ -22,6 +22,8 @@
 #include <cstdlib>
 #include <stdexcept>
 
+#include <unistd.h>
+
 #include <systemd/sd-daemon.h>
 
 #include "connection_manager.h"
@@ -39,10 +41,12 @@ main()
   try
     {
       groupgd::ConnectionManager::instance().run();
+      sleep(1);
     }
   catch (std::exception& e)
     {
       groupgd::safe_journal(SD_CRIT, e.what());
+      sleep(1);
       std::exit(EXIT_FAILURE);
     }
 }
