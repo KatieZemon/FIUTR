@@ -24,17 +24,16 @@ import android.widget.Toast;
  */
 public class ViewAllActivity extends ListActivity {
 
+	NetworkAdapterItem adapter;
+	ArrayList<Network> networkList = new ArrayList<Network>();
+	private String filePath;
+	private String pageTitle; // title of page depends on whether you are viewing all or searching
+	
 	/**
 	 * Method automatically called with the ViewAllActivity page is created.
 	 * It sets the activity_viewall layout containing a list of the networks 
 	 * to be displayed
 	 */
-	
-	NetworkAdapterItem adapter;
-	ArrayList<Network> networkList = new ArrayList<Network>();
-	private String filePath;
-	
-	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -43,7 +42,9 @@ public class ViewAllActivity extends ListActivity {
 		Bundle extras = getIntent().getExtras();
 		if(extras != null)
 		{
+			pageTitle = extras.getString("PAGE_TITLE");
 			filePath = extras.getString("FILE_PATH");
+			setTitle(pageTitle);
 		}
 		
 		checkFileForDuplicates();

@@ -90,6 +90,7 @@ public class SearchActivity extends Activity {
 				savePreferences();
 				Intent intent = new Intent(SearchActivity.this, ViewAllActivity.class);
 				intent.putExtra("FILE_PATH",filePath);
+				intent.putExtra("PAGE_TITLE","Search Results");
 				startActivity(intent);
 				finish();
 			}
