@@ -3,11 +3,16 @@ import java.util.ArrayList;
 
 import android.app.ListActivity;
 import android.net.wifi.ScanResult;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.*;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Toast;
+import android.widget.ToggleButton;
 import android.support.v4.app.NavUtils;
 
 /**
@@ -22,6 +27,9 @@ public class ScanActivity extends ListActivity
 	ArrayList<LocationNetwork> gpsWireless = new ArrayList<LocationNetwork>();
 	WifiAdapterItem adapter;
 	Button connectButton;
+	ToggleButton continuousConnectionButton;
+	private final Handler handler = new Handler();
+	 boolean running = true;
 
 	/**
 	 * Method automatically called when the ScanActivity page is created.
@@ -49,6 +57,9 @@ public class ScanActivity extends ListActivity
 		setListAdapter(adapter);
 		
 		connectButton = (Button) findViewById(R.id.connectButton);
+		continuousConnectionButton = (ToggleButton)findViewById(R.id.togglebutton);
+		
+		
 		/**
 		 * This is the listener for the connect button.
 		 * It iterates through all networks resulting from the scan and it
@@ -76,13 +87,67 @@ public class ScanActivity extends ListActivity
 				{
 					tester.connectToNetwork(result.get(i));
 				}
+				if (result.size() == 0)
+				{
+					Toast.makeText(ScanActivity.this,"No networks were selected!",Toast.LENGTH_SHORT).show();
+				}
+				else
+				{
+					Toast.makeText(ScanActivity.this,"Connecting to network",Toast.LENGTH_SHORT).show();
+				}
 			}}	
 		);
+		boolean running;
+		/**
+		 * This is the listener for the toggle button
+		 */
+		continuousConnectionButton.setOnClickListener( new OnClickListener()	
+		{
+			@Override
+			public void onClick(final View v) {
+			    // Is the toggle on?
+			    boolean on = ((ToggleButton) v).isChecked();
+			   
+			   
+			    if (on) {
+			    	 new Thread(new Runnable() {
+			    		    public void run() {
+			    		    	
+			    		      v.post(new Runnable() {
+			    		    	  
+			    		        public void run() {
+			    		        	
+			    		        	try {
+			    						Thread.sleep(1000);
+			    						onUpdate();
+			    						Toast.makeText(ScanActivity.this,"Thread started",Toast.LENGTH_SHORT).show();
+			    					} catch (InterruptedException e) {
+			    						// TODO Auto-generated catch block
+			    						e.printStackTrace();
+			    					}
+		    		        		
+			    		        }
+			    		      });
+			    		    }
+			    		  }).start();
+			    }
+			    else {
+			    	Toast.makeText(ScanActivity.this,"Thread stopped",Toast.LENGTH_SHORT).show();
+			    	//t_continuousScan.stop();
+			    	
+			    	//cs.kill();
+			    }
+			}
+		}
+		);
+		
 		if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB)
 		{
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 	}
+	
+	
 	
 	/**
 	 * This method will rescan for all local networks and display
@@ -139,6 +204,40 @@ public class ScanActivity extends ListActivity
 		else
 			return super.onOptionsItemSelected(item);		
 	}	
-}
+	
+	/**
+	* This class is used for implementing a continuous 
+	* scan whenever the continuous scan button is pressed
+	*/
+	/*public class ContinuousScan implements Runnable {
+	   Thread t;
+	   private volatile boolean isRunning = true;
 
+	   ContinuousScan() {
+		   t = new Thread(this);
+		   t.start();
+	   }
+	   public void run()
+	   {
+	     while (isRunning)
+	     {         
+	    	 Toast.makeText(ScanActivity.this,"Updating!",Toast.LENGTH_SHORT).show();
+	         onUpdate();
+	         try {
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	     }
+	   }
+
+	   public void kill() {
+	       isRunning = false;
+	   }
+
+	}*/
+
+
+}
 
