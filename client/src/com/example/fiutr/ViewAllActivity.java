@@ -28,6 +28,7 @@ public class ViewAllActivity extends ListActivity {
 	ArrayList<Network> networkList = new ArrayList<Network>();
 	private String filePath;
 	private String pageTitle; // title of page depends on whether you are viewing all or searching
+	private boolean viewAllData;
 	
 	/**
 	 * Method automatically called with the ViewAllActivity page is created.
@@ -42,9 +43,14 @@ public class ViewAllActivity extends ListActivity {
 		Bundle extras = getIntent().getExtras();
 		if(extras != null)
 		{
-			pageTitle = extras.getString("PAGE_TITLE");
+			viewAllData = extras.getBoolean("BOOL_VIEW_ALL");
 			filePath = extras.getString("FILE_PATH");
-			setTitle(pageTitle);
+			
+			if (viewAllData)
+				setTitle("View All");
+			else
+				setTitle("Search Results");
+			
 		}
 		
 		checkFileForDuplicates();
@@ -60,6 +66,69 @@ public class ViewAllActivity extends ListActivity {
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 	}
+
+	/*
+	 * Read in all of the data from the text file and display it
+	 */
+	public void getData()
+	{
+		try
+		{
+			BufferedReader reader = new BufferedReader(new FileReader(filePath));
+			String line;
+			while((line = reader.readLine()) != null)
+			{
+				if(line.contains("|"))
+				{
+					System.out.println("Parsing line: [ "+line+" ]");
+					// Format is: NAMEOFNETWORK|INFO_OF_NETWORK|LATITUDE|LONGITUDE
+					String[] parsedLine = line.split("\\|");
+					
+					// Viewing all data
+					if (viewAllData)
+					{
+					  networkList.add(new Network(parsedLine[0], parsedLine[1], Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3])));
+					}
+					
+					// View only data pertaining to search result
+					else
+					{
+						// If prefDistSeekbar.getProgress()
+						int distance = SearchActivity.getDistance();
+						//int 
+					}
+				}
+				else
+				{
+					System.out.println("Caught blankspace!");
+				}
+			}
+			reader.close();
+		}
+		catch (Exception e)
+		{
+			System.err.println("Unable to populate view all!\n");
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * The user will return to the home page when the back button
+	 * at the top of the screen is pressed
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case android.R.id.home:
+			NavUtils.navigateUpFromSameTask(this);
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+	
+	/**
+	 * This can be removed later
+	 */
 	public void checkFileForDuplicates()
 	{
 		 Toast.makeText(this,"Path" + filePath,Toast.LENGTH_SHORT).show();
@@ -101,48 +170,5 @@ public class ViewAllActivity extends ListActivity {
 			System.err.println("Unable to check file for duplicates!\n");
 			e.printStackTrace();
 		}
-	}
-
-	public void getData()
-	{
-		try
-		{
-			BufferedReader reader = new BufferedReader(new FileReader(filePath));
-			String line;
-			while((line = reader.readLine()) != null)
-			{
-				if(line.contains("|"))
-				{
-					System.out.println("Parsing line: [ "+line+" ]");
-					// Format is: NAMEOFNETWORK|INFO_OF_NETWORK|LATITUDE|LONGITUDE
-					String[] parsedLine = line.split("\\|");
-					networkList.add(new Network(parsedLine[0], parsedLine[1], Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3])));
-				}
-				else
-				{
-					System.out.println("Caught blankspace!");
-				}
-			}
-			reader.close();
-		}
-		catch (Exception e)
-		{
-			System.err.println("Unable to populate view all!\n");
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * The user will return to the home page when the back button
-	 * at the top of the screen is pressed
-	 */
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		switch (item.getItemId()) {
-		case android.R.id.home:
-			NavUtils.navigateUpFromSameTask(this);
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
 	}
 }

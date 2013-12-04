@@ -90,7 +90,7 @@ public class MainActivity extends Activity implements LocationListener
 		case R.id.action_viewAll:
 			intent = new Intent(this, ViewAllActivity.class);
 			intent.putExtra("FILE_PATH",filePath);
-			intent.putExtra("PAGE_TITLE","View All");
+			intent.putExtra("BOOL_VIEW_ALL",true); // Viewing all data
 			startActivity(intent);
 			return true;
 		case R.id.action_about:
