@@ -55,6 +55,8 @@ Connection::~Connection()
 void
 Connection::async_run()
 {
+  safe_journal(SD_DEBUG,
+               "Accepted " + socket_.remote_endpoint().address().to_string());
   deadline_timer_.async_wait(std::bind(&Connection::on_deadline_timer_expired,
                                        shared_from_this(),
                                        std::placeholders::_1));
