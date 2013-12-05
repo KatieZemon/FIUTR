@@ -1,5 +1,6 @@
 package com.example.fiutr;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,8 +9,11 @@ import java.io.PrintStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketTimeoutException;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,10 +24,8 @@ public class StartActivity extends Activity {
 
 	private final String SERVER_IP = "131.151.90.161";
 	private final int SERVER_PORT = 50000;
-	private TextView serverStatus;
-	private boolean isConnected = false;
 	private String filePath = "";
-	private String fileName = "gpsMaps.txt";
+	private String fileName = "gpsmaps.txt";
 	private FileOutputStream writer;
 	private String message = "";
 	
@@ -32,13 +34,13 @@ public class StartActivity extends Activity {
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_start);
-		filePath = getFilesDir().toString()+"/gpsmaps.txt";
+		filePath = getFilesDir().toString()+"/"+fileName;
+		System.out.println(filePath);
 		System.out.println("Starting thread");
-		NetworkTask newtask = new NetworkTask();
+		ProgressDialog temp = new ProgressDialog(this);
+		temp.setMessage("Loading...");
+		NetworkTask newtask = new NetworkTask(temp);
 		newtask.execute();
-		//System.out.println("Starting main activity");
-		//Intent intent = new Intent(this, MainActivity.class);
-		//startActivity(intent);
 		return;
 	}
 	
@@ -47,6 +49,19 @@ public class StartActivity extends Activity {
 		Socket socket;
 		InputStream nis;
 		OutputStream nos;
+		String fileOutputString = "";
+		ProgressDialog dialog;
+		
+		public NetworkTask(ProgressDialog temp)
+		{
+			this.dialog = temp;
+		}
+		
+		@Override
+		public void onPreExecute()
+		{
+			dialog.show();
+		}
 		
 		@Override
 		protected Boolean doInBackground(Void... params)
@@ -61,21 +76,39 @@ public class StartActivity extends Activity {
 				{
 					nis = socket.getInputStream();
 					nos = socket.getOutputStream();
+					socket.setSoTimeout(6000);
 					PrintStream strm = new PrintStream(nos);
-					//strm.print("ADD NETWORK thingy 44 66 -68\r\n");
 					strm.print("GET NETWORKS SUPER SPECIAL\r\n");
-					//strm.close();
 					byte[] buffer = new byte[4096];
 					int read = nis.read(buffer,0,4096);
 					while(read != -1)
 					{
 						byte[] tempData = new byte[read];
 						System.arraycopy(buffer,0,tempData,0,read);
-						System.out.println(new String(tempData));
+						fileOutputString+=new String(tempData);
 						read = nis.read(buffer,0,4096);
 					}
 				}
 				return false;
+			}
+			catch(SocketTimeoutException timeout)
+			{
+				if(fileOutputString == "")
+					return false;
+				try
+				{
+					System.out.println(fileOutputString);
+					File dataFile = new File(filePath);
+					FileOutputStream dataStream = new FileOutputStream(dataFile,false);
+					dataStream.write(fileOutputString.getBytes());
+					dataStream.close();
+				}
+				catch(Exception e)
+				{
+					e.printStackTrace();
+				}
+
+				return true;
 			}
 			catch (Exception e)
 			{
@@ -98,10 +131,17 @@ public class StartActivity extends Activity {
 			return false;
 		}
 		
-		
-	}
-	static String convertStreamToString(java.io.InputStream is) {
-	    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-	    return s.hasNext() ? s.next() : "";
+		@Override
+		protected void onPostExecute(Boolean result)
+		{
+			if(result)
+			{
+				dialog.dismiss();
+				System.out.println("Successfully worked.");
+				Intent intent = new Intent(StartActivity.this, MainActivity.class);
+				startActivity(intent);
+				StartActivity.this.finish();
+			}
+		}
 	}
 }

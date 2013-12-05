@@ -86,12 +86,8 @@ public class ScanActivity extends ListActivity
 			    {			
 			        return isRunning;			
 			    }
-			
-			   		 
-			
 			}
-
-		
+	
 	/**
 	 * Method automatically called when the ScanActivity page is created.
 	 * It creates a new GPSHandler and wifiHandler in order to display the map

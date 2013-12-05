@@ -16,15 +16,18 @@ import java.util.Set;
 
 import android.location.*;
 import android.net.wifi.ScanResult;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.*;
+import com.google.android.gms.maps.GoogleMap.OnCameraChangeListener;
 import com.google.android.gms.maps.model.*;
 
 
@@ -38,8 +41,8 @@ public class MainActivity extends Activity implements LocationListener
 	private final ArrayList<LocationNetwork> wifiGPS = new ArrayList<LocationNetwork>();
 	private final ArrayList<Marker> markerList = new ArrayList<Marker>();
 	private static String filePath;
-	private String fileName = "gpsmaps.txt";
-	private FileOutputStream writer;
+	private AsyncTimer updateTimer;
+	private float zoomLevel = 15f;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +56,9 @@ public class MainActivity extends Activity implements LocationListener
 
 		try
 		{
-			checkFileForDuplicates();
 			initializeMap();
+			startThread();
 			parseFile();
-			openFile();
 		}
 		catch(Exception e)
 		{
@@ -108,13 +110,7 @@ public class MainActivity extends Activity implements LocationListener
 	{
 		super.onPause();
 		gpsHandler.disable(this);
-		// Close File IO
-		
-		try {
-			writer.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		stopThread();
 	}
 	
 	@Override
@@ -123,7 +119,7 @@ public class MainActivity extends Activity implements LocationListener
 		super.onResume();
 		gpsHandler.enable(this);
 		updateMap();
-		openFile();
+		startThread();
 	}
 	
 	private void initializeMap()
@@ -131,6 +127,7 @@ public class MainActivity extends Activity implements LocationListener
 		if(googleMap == null)
 		{
 			googleMap = ((MapFragment) getFragmentManager().findFragmentById(R.id.map)).getMap();
+			googleMap.setOnCameraChangeListener(getCameraChangeListener());
 			updateMap();
 		}
 		if(googleMap == null)
@@ -145,7 +142,7 @@ public class MainActivity extends Activity implements LocationListener
 			removeMarker("Current Location");
 			camPos = new CameraPosition.Builder()
 				.target(new LatLng(gpsHandler.getLat(),gpsHandler.getLon()))
-				.zoom(17)
+				.zoom(zoomLevel)
 				.build();
 			googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos));
 			addMarker("Current Location", new LatLng(gpsHandler.getLat(),gpsHandler.getLon()));
@@ -165,7 +162,8 @@ public class MainActivity extends Activity implements LocationListener
 			removeMarker(result.SSID);
 			// Add it to our array of LocationNetworks, and to the map.
 			wifiGPS.add(new LocationNetwork(result, latitude, longitude));
-			addMarker(result, new LatLng(latitude, longitude));
+			Network temp = new Network(result.SSID,result.level,latitude, longitude,"");
+			addMarker(temp,true);
 		}
 	}
 	
@@ -178,31 +176,20 @@ public class MainActivity extends Activity implements LocationListener
 		markerList.add(marker);
 	}
 	
-	public void addMarker(ScanResult result, LatLng loc)
+	public void addMarker(Network network, boolean report)
 	{
-		
 		Marker marker = googleMap.addMarker(new MarkerOptions()
-								 .position(loc)
-								 .title(result.SSID)
-								 .snippet(result.toString())
+								 .position(network.getLocation())
+								 .title(network.getName())
+								 .snippet("Bars: "+network.getBars())
 								 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
 		if(!markerList.contains(marker))
+			markerList.add(marker);
+		if (report)
 		{
-			markerList.add(marker);
-			writeToFile(result, loc);
+			ServerHandler handler = new ServerHandler();
+			handler.addNetwork(network);
 		}
-		
-	}
-	
-	public void addMarker(String nameOfNetwork, String info, LatLng loc)
-	{
-		Marker marker = googleMap.addMarker(new MarkerOptions()
-								 .position(loc)
-								 .title(nameOfNetwork)
-								 .snippet(info)
-								 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE)));
-		if(!markerList.contains(marker))
-			markerList.add(marker);
 	}
 	
 	public void removeMarker(String title)
@@ -223,52 +210,9 @@ public class MainActivity extends Activity implements LocationListener
 	{
 		camPos = new CameraPosition.Builder()
 			.target(new LatLng(location.getLatitude(),location.getLongitude()))
-			.zoom(15)
+			.zoom(zoomLevel)
 			.build();
 		googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos));
-	}
-	
-	// Remove duplicate files displayed in viewall activity
-	public static void checkFileForDuplicates()
-	{
-		try
-		{
-			BufferedReader reader = new BufferedReader(new FileReader(filePath));
-			Set<String> lines = new LinkedHashSet<String>(10000);
-			String line;
-			while ((line = reader.readLine()) != null)
-			{
-				lines.add(line);
-			}
-			reader.close();
-			BufferedWriter tempWriter = new BufferedWriter(new FileWriter(filePath));
-			for(String uniqueLines : lines)
-			{
-				tempWriter.write(uniqueLines);
-				tempWriter.newLine();
-			}
-			tempWriter.close();
-		}
-		catch (FileNotFoundException e)
-		{
-			try
-			{
-				System.err.println("Creating a new file!\n");
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
-				writer.close();
-				checkFileForDuplicates();
-			}
-			catch (Exception f)
-			{
-				f.printStackTrace();
-			}
-			
-		}
-		catch (Exception e)
-		{
-			System.err.println("Unable to check file for duplicates!\n");
-			e.printStackTrace();
-		}
 	}
 	
 	public void parseFile()
@@ -282,14 +226,11 @@ public class MainActivity extends Activity implements LocationListener
 				if(line.contains("|"))
 				{
 					System.out.println("Parsing line: [ "+line+" ]");
-					// Format is: NAMEOFNETWORK|INFO_OF_NETWORK|LATITUDE|LONGITUDE
+					// Format is: NAMEOFNETWORK|SIGNAL STRENGTH|LATITUDE|LONGITUDE
 					String[] parsedLine = line.split("\\|");
-					for(String s : parsedLine)
-						System.out.println(s);
-					addMarker(parsedLine[0],parsedLine[1],new LatLng(Double.parseDouble(parsedLine[2]),Double.parseDouble(parsedLine[3])));
+					Network currentNetwork = new Network(parsedLine[0],Integer.parseInt(parsedLine[1]),Double.parseDouble(parsedLine[2]),Double.parseDouble(parsedLine[3]),"");
+					addMarker(currentNetwork, false);
 				}
-				else
-					System.out.println("Caught newline!");
 			}
 			reader.close();
 		}
@@ -313,67 +254,9 @@ public class MainActivity extends Activity implements LocationListener
 			System.err.println("Unable to parse file for networks!\n");
 			e.printStackTrace();
 		}
+		return;
 	}
 	
-	public void writeToFile(ScanResult result, LatLng loc)
-	{
-		// FORMAT is: NAMEOFNETWORK|INFO_OF_NETWORK|LATITUDE|LONGITUDE
-		if(writer == null)
-			openFile();
-		try
-		{
-			writer.write((result.SSID+"|"+result.level+"|"+loc.latitude+"|"+loc.longitude).getBytes());
-			writer.write(System.getProperty("line.separator").getBytes());
-		}
-		catch (FileNotFoundException e)
-		{
-			try
-			{
-				System.err.println("Creating a new file!\n");
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
-				writer.close();
-				writeToFile(result,loc);
-			}
-			catch (Exception f)
-			{
-				f.printStackTrace();
-			}
-			
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-	}
-	
-	public void openFile()
-	{
-		if(writer != null)
-			return;
-		try
-		{
-			writer = openFileOutput(fileName, Context.MODE_APPEND);
-		}
-		catch (FileNotFoundException e)
-		{
-			try
-			{
-				System.err.println("Creating a new file!\n");
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
-				writer.close();
-				openFile();
-			}
-			catch (Exception f)
-			{
-				f.printStackTrace();
-			}
-			
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
 	
 	@Override
 	public void onStatusChanged(String provider, int status, Bundle extras)
@@ -393,5 +276,71 @@ public class MainActivity extends Activity implements LocationListener
 		
 	}
 
+	public void startThread()
+	{
+		Toast.makeText(this, "Starting thread", Toast.LENGTH_LONG);
+		updateTimer = new AsyncTimer();
+		updateTimer.execute();
+	}
+	
+	public void stopThread()
+	{
+		updateTimer.cancel(true);
+	}
+	
+	public class AsyncTimer extends AsyncTask<Void,Integer,Boolean>{
+	    private boolean isRunning;
+	    private boolean stop;
+	    
+	    @Override
+	    protected Boolean doInBackground(Void... arg0) {
+	        isRunning = true;
+
+	        while(isRunning)
+	        {
+	            try {
+	                Thread.sleep(3000);
+	            } catch (InterruptedException e) {
+	                Log.e("Thread Interrupted", e.getMessage());
+	            }
+	            runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                    	processWiFiLocations(wifiHandler.getWifiNetworks(),gpsHandler.getLat(), gpsHandler.getLon());
+                    }
+                });
+	        }
+	        if(stop==false)
+	            return true;
+	        else
+	            return false;
+	    }
+
+	    @Override
+	    protected void onCancelled() {
+	        stop = true;
+	        isRunning = false;
+	    }
+	
+	    public boolean getIsRunning()			
+	    {			
+	        return isRunning;			
+	    }
+	}
+	
+	public OnCameraChangeListener getCameraChangeListener()
+	{
+	    return new OnCameraChangeListener() 
+	    {
+	        @Override
+	        public void onCameraChange(CameraPosition position) 
+	        {
+	        	if(position.zoom != zoomLevel)
+	        	{
+	        		zoomLevel = position.zoom;
+	        	}
+	        }
+	    };
+	}
 
 }

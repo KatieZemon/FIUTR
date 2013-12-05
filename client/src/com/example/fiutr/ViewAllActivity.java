@@ -30,6 +30,10 @@ public class ViewAllActivity extends ListActivity {
 	private String pageTitle; // title of page depends on whether you are viewing all or searching
 	private boolean viewAllData;
 	
+	private int searchDistance = 0;
+	private int searchSignal = 0;
+	private int searchResults = 0;
+	
 	/**
 	 * Method automatically called with the ViewAllActivity page is created.
 	 * It sets the activity_viewall layout containing a list of the networks 
@@ -39,27 +43,24 @@ public class ViewAllActivity extends ListActivity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_viewall);	
-		
 		Bundle extras = getIntent().getExtras();
 		if(extras != null)
 		{
 			viewAllData = extras.getBoolean("BOOL_VIEW_ALL");
 			filePath = extras.getString("FILE_PATH");
-			
+			searchDistance = extras.getInt("DISTANCE");
+			searchSignal = extras.getInt("SIGNAL");
+			searchResults = extras.getInt("NUMRESULTS");
 			if (viewAllData)
 				setTitle("View All");
 			else
 				setTitle("Search Results");
-			
 		}
-		
 		checkFileForDuplicates();
 		getData();
 		adapter = new NetworkAdapterItem(this, R.layout.list_viewall, networkList);
 		setListAdapter(adapter);
-		
-		
-		
+
 		// Make sure we're running on Honeycomb or higher to use ActionBar APIs
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			// Show the Up button in the action bar.
@@ -72,11 +73,9 @@ public class ViewAllActivity extends ListActivity {
 	 */
 	public void getData()
 	{
-		int distance = SearchActivity.getDistance();
-		int signalStrength = SearchActivity.getSignalStrength();
-		int numResults = SearchActivity.getNumResults();
 		int listedResults = 0; // keep track of total results listed
-		
+		GPSHandler gpsHandler = new GPSHandler(this);
+		gpsHandler.updateLocation();
 		try
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(filePath));
@@ -86,29 +85,24 @@ public class ViewAllActivity extends ListActivity {
 				if(line.contains("|"))
 				{
 					System.out.println("Parsing line: [ "+line+" ]");
-					// Format is: NAMEOFNETWORK|INFO_OF_NETWORK|LATITUDE|LONGITUDE
+					// Format is: NAMEOFNETWORK|SIGNAL_LEVEL|LATITUDE|LONGITUDE
 					String[] parsedLine = line.split("\\|");
-					
+					Network currentItem = new Network(parsedLine[0], Integer.parseInt(parsedLine[1]), Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3]),"");
 					// Viewing all data
 					if (viewAllData)
 					{
-					  networkList.add(new Network(parsedLine[0], parsedLine[1], Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3])));
+					  networkList.add(currentItem);
 					}
-					
 					// View only data pertaining to search result
 					else
 					{
-						if (distance > 20 // Get network distance
-								&& signalStrength > 4 // get network strength
-								&& numResults > listedResults)
+						if (searchDistance >= currentItem.calculateDistance(gpsHandler.getLat(), gpsHandler.getLon(), 'M') && currentItem.getBars() >= searchSignal && searchResults > listedResults)
 						{
-							
-							networkList.add(new Network(parsedLine[0], parsedLine[1], Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3])));
+							networkList.add(currentItem);
 							listedResults++; // increment total number of results added to list
 						}
 					}
 				}
-				
 				else
 				{
 					System.out.println("Caught blankspace!");
@@ -142,7 +136,6 @@ public class ViewAllActivity extends ListActivity {
 	 */
 	public void checkFileForDuplicates()
 	{
-		 Toast.makeText(this,"Path" + filePath,Toast.LENGTH_SHORT).show();
 		try
 		{
 			BufferedReader reader = new BufferedReader(new FileReader(filePath));

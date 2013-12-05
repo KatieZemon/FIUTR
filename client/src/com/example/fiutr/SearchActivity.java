@@ -91,6 +91,9 @@ public class SearchActivity extends Activity {
 				Intent intent = new Intent(SearchActivity.this, ViewAllActivity.class);
 				intent.putExtra("FILE_PATH",filePath);
 				intent.putExtra("BOOL_VIEW_ALL",false); // Viewing only data pertaining to search results
+				intent.putExtra("DISTANCE",getDistance());
+				intent.putExtra("SIGNAL", getSignalStrength());
+				intent.putExtra("NUMRESULTS", getNumResults());
 				startActivity(intent);
 				finish();
 			}

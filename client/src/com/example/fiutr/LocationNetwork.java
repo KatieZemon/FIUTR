@@ -80,6 +80,21 @@ public class LocationNetwork
 		return longitude;
 	}
 	
+	public int getBars()
+	{
+		int signalStrength = Math.abs(wifiData.level);
+		if(signalStrength <= 76)
+			return 5;
+		else if(signalStrength <= 87)
+				return 4;
+		else if(signalStrength <= 98)
+				return 3;
+		else if(signalStrength <= 107)
+				return 2;
+		else
+			return 1;
+	}
+	
 	/**
 	 * Return a string of information for this network. 
 	 * This information includes the SSID, signal strength, latitude, and longitude
@@ -88,5 +103,28 @@ public class LocationNetwork
 	{
 		return wifiData.SSID + "|" + wifiData.level + "|" + latitude + "|" + longitude;
 	}
+	
+	public double calculateDistance(double lat1, double lon1, char unit) 
+	{
+	      double theta = lon1 - longitude;
+	      double dist = Math.sin(deg2rad(lat1)) * Math.sin(deg2rad(latitude)) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(latitude)) * Math.cos(deg2rad(theta));
+	      dist = Math.acos(dist);
+	      dist = rad2deg(dist);
+	      dist = dist * 60 * 1.1515;
+	      if (unit == 'K') {
+	        dist = dist * 1.609344;
+	      } else if (unit == 'N') {
+	        dist = dist * 0.8684;
+	        }
+	      return (dist);
+	    }
+
+    private double deg2rad(double deg) {
+      return (deg * Math.PI / 180.0);
+    }
+
+    private double rad2deg(double rad) {
+      return (rad * 180.0 / Math.PI);
+    }
 	
 }

@@ -51,7 +51,8 @@ public class NetworkAdapterItem extends ArrayAdapter<Network> {
 		
 		Network currentItem = networkList.get(position);
 		holder.title.setText(currentItem.getName());
-		holder.desc.setText(currentItem.getDetails());
+		holder.desc.setText("Bars: "+currentItem.getBars()+"\n");
+		holder.desc.append("Latitude: "+currentItem.getLocation().latitude+"\nLongitude: "+currentItem.getLocation().longitude);
 		return row;
 	}
 	
@@ -60,5 +61,4 @@ public class NetworkAdapterItem extends ArrayAdapter<Network> {
 		TextView title;
 		TextView desc;
 	}
-
 }
