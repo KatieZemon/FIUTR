@@ -16,9 +16,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class StartActivity extends Activity {
 
@@ -38,7 +35,8 @@ public class StartActivity extends Activity {
 		System.out.println(filePath);
 		System.out.println("Starting thread");
 		ProgressDialog temp = new ProgressDialog(this);
-		temp.setMessage("Loading...");
+		temp.setTitle("Loading");
+		temp.setMessage("Downloading file from server...");
 		NetworkTask newtask = new NetworkTask(temp);
 		newtask.execute();
 		return;

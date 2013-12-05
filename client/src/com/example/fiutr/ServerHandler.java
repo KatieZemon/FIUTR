@@ -1,7 +1,6 @@
 package com.example.fiutr;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.InetSocketAddress;
@@ -9,13 +8,11 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 
-import android.content.Context;
 import android.os.AsyncTask;
 
 public class ServerHandler {
 
-	private Context mContext;
-	private String addNetwork = "ADD ";
+	private String addNetwork = "ADD NETWORK ";
 	private String SERVER_IP = "131.151.90.161";
 	private int SERVER_PORT = 50000;
 	
@@ -47,8 +44,8 @@ public class ServerHandler {
 					nos = socket.getOutputStream();
 					socket.setSoTimeout(3000);
 					PrintStream strm = new PrintStream(nos);
-					System.out.println(addNetwork+networks[0].getName()+" "+networks[0].getLocation().latitude+" "+networks[0].getLocation().longitude+" "+networks[0].signalLevel+"\r\n");
-					strm.print(addNetwork+networks[0].getName()+" "+networks[0].getLocation().latitude+" "+networks[0].getLocation().longitude+" "+networks[0].signalLevel+"\r\n");
+					System.out.println(addNetwork+networks[0].getName()+" "+networks[0].signalLevel+" "+networks[0].getLocation().latitude+" "+networks[0].getLocation().longitude+"\r\n");
+					strm.print(addNetwork+networks[0].getName()+" "+networks[0].signalLevel+" "+networks[0].getLocation().latitude+" "+networks[0].getLocation().longitude+"\r\n");
 					return true;
 				}
 				return false;
