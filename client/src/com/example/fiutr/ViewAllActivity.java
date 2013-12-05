@@ -53,7 +53,6 @@ public class ViewAllActivity extends ListActivity {
 			
 		}
 		
-		checkFileForDuplicates();
 		getData();
 		adapter = new NetworkAdapterItem(this, R.layout.list_viewall, networkList);
 		setListAdapter(adapter);	
@@ -70,12 +69,14 @@ public class ViewAllActivity extends ListActivity {
 		GPSHandler h = new GPSHandler(null);
 		h.updateLocation();
 		//h.getLat();
-		startLocation.setLatitude(30);
-		startLocation.setLongitude(30);
+		startLocation.setLatitude(h.getLat());
+		startLocation.setLongitude(h.getLon());
 		
 		Location endLocation = new Location("");
 		endLocation.setLatitude(destLat);
 		endLocation.setLongitude(destLon);
+		
+
 		
 		return startLocation.distanceTo(endLocation);
 	}
@@ -109,14 +110,16 @@ public class ViewAllActivity extends ListActivity {
 					// Keep track of duplicates
 					for (int i = 0; i < networkNames.size(); i++)
 					{
-						 Toast.makeText(this,parsedLine[0],Toast.LENGTH_SHORT).show();
-						if (parsedLine[0] == networkNames.get(0))
+						if (parsedLine[0].equals(networkNames.get(i))) // Check if two strings are equal
 						{
 							networkIsUnique = false;
 						}
 					}
 					if (networkIsUnique)
 					{
+						// Add the network name to the array list
+						networkNames.add(parsedLine[0]);
+						
 						// Viewing all data
 						if (viewAllData)
 						{
@@ -126,7 +129,7 @@ public class ViewAllActivity extends ListActivity {
 						// View only data pertaining to search result
 						else
 						{
-							if (distancePreference >= 3//getDistance(Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3]))
+							if (distancePreference >= getDistance(Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3]))
 									&& signalStrengthPreference > 2 // Get conversion of network signal strength
 									&& numResultsPreference > listedResults)
 							{
@@ -166,49 +169,4 @@ public class ViewAllActivity extends ListActivity {
 		return super.onOptionsItemSelected(item);
 	}
 	
-	/**
-	 * This can be removed later
-	 */
-	public void checkFileForDuplicates()
-	{
-		 Toast.makeText(this,"Path" + filePath,Toast.LENGTH_SHORT).show();
-		try
-		{
-			BufferedReader reader = new BufferedReader(new FileReader(filePath));
-			Set<String> lines = new LinkedHashSet<String>(10000);
-			String line;
-			while ((line = reader.readLine()) != null)
-			{
-				lines.add(line);
-			}
-			reader.close();
-			BufferedWriter tempWriter = new BufferedWriter(new FileWriter(filePath));
-			for(String uniqueLines : lines)
-			{
-				tempWriter.write(uniqueLines);
-				tempWriter.newLine();
-			}
-			tempWriter.close();
-		}
-		catch (FileNotFoundException e)
-		{
-			try
-			{
-				System.err.println("Creating a new file!\n");
-				BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
-				writer.close();
-				checkFileForDuplicates();
-			}
-			catch (Exception f)
-			{
-				f.printStackTrace();
-			}
-			
-		}
-		catch (Exception e)
-		{
-			System.err.println("Unable to check file for duplicates!\n");
-			e.printStackTrace();
-		}
-	}
 }
