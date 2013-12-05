@@ -142,16 +142,16 @@ public class SearchActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
-	public static int getDistance()
+	public static int getDistancePreference()
 	{
 		return prefDistSeekbar.getProgress();
 	}
 	
-	public static int getSignalStrength()
+	public static int getSignalStrengthPreference()
 	{
 		return prefSignalSeekbar.getProgress();
 	}
-	public static int getNumResults()
+	public static int getNumResultsPreference()
 	{
 		return prefResultsSeekbar.getProgress();
 	}

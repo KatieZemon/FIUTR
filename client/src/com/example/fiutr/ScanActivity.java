@@ -107,12 +107,16 @@ public class ScanActivity extends ListActivity
 		currentNetworks = tester.getWifiNetworks();
 		gpsWireless.clear();
 		
+		GPSHandler gpsLoc = new GPSHandler(this);
+		gpsLoc.updateLocation();
 		// For each local network found, add a new location on the map
 		// for this network
 		for(ScanResult item : currentNetworks)
 		{
-			gpsWireless.add(new LocationNetwork(item, 35, 24));
+			gpsWireless.add(new LocationNetwork(item, gpsLoc.getLat(), gpsLoc.getLon()));
 		}
+		
+		
 		
 		adapter = new WifiAdapterItem(this, R.layout.list_networks, gpsWireless);
 		setListAdapter(adapter);

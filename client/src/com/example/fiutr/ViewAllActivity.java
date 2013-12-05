@@ -12,6 +12,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import android.app.ListActivity;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
@@ -66,15 +67,29 @@ public class ViewAllActivity extends ListActivity {
 			getActionBar().setDisplayHomeAsUpEnabled(true);
 		}
 	}
-
+	// Calculate distance from the user's location to a specific point
+	public static double getDistance(double destLat, double destLon) {
+		Location startLocation = new Location("");
+		GPSHandler h = new GPSHandler(null);
+		h.updateLocation();
+		startLocation.setLatitude(h.getLat());
+		startLocation.setLongitude(h.getLon());
+		
+		Location endLocation = new Location("");
+		endLocation.setLatitude(destLat);
+		endLocation.setLongitude(destLon);
+		
+		return startLocation.distanceTo(endLocation);
+	}
+	
 	/*
 	 * Read in all of the data from the text file and display it
 	 */
 	public void getData()
 	{
-		int distance = SearchActivity.getDistance();
-		int signalStrength = SearchActivity.getSignalStrength();
-		int numResults = SearchActivity.getNumResults();
+		int distancePreference = SearchActivity.getDistancePreference();
+		int signalStrengthPreference = SearchActivity.getSignalStrengthPreference();
+		int numResultsPreference = SearchActivity.getNumResultsPreference();
 		int listedResults = 0; // keep track of total results listed
 		
 		try
@@ -98,9 +113,9 @@ public class ViewAllActivity extends ListActivity {
 					// View only data pertaining to search result
 					else
 					{
-						if (distance > 20 // Get network distance
-								&& signalStrength > 4 // get network strength
-								&& numResults > listedResults)
+						if (distancePreference >= getDistance(Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3]))
+								&& signalStrengthPreference > 2 // Get conversion of network signal strength
+								&& numResultsPreference > listedResults)
 						{
 							
 							networkList.add(new Network(parsedLine[0], parsedLine[1], Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3])));

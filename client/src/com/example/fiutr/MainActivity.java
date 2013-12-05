@@ -33,7 +33,7 @@ public class MainActivity extends Activity implements LocationListener
 	
 	private GoogleMap googleMap;
 	private CameraPosition camPos;
-	private GPSHandler gpsHandler;
+	private static GPSHandler gpsHandler;
 	private WiFiHandler wifiHandler;
 	private final ArrayList<LocationNetwork> wifiGPS = new ArrayList<LocationNetwork>();
 	private final ArrayList<Marker> markerList = new ArrayList<Marker>();
@@ -62,6 +62,21 @@ public class MainActivity extends Activity implements LocationListener
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	// Calculate distance from the user's location to a specific point
+	public static double getDistance(double destLat, double destLon) {
+		Location startLocation = new Location("");
+		GPSHandler h = new GPSHandler(null);
+		h.updateLocation();
+		startLocation.setLatitude(h.getLat());
+		startLocation.setLongitude(h.getLon());
+		
+		Location endLocation = new Location("");
+		endLocation.setLatitude(gpsHandler.getLat());
+		endLocation.setLongitude(gpsHandler.getLon());
+		
+		return startLocation.distanceTo(endLocation);
 	}
 
 	@Override
@@ -148,6 +163,8 @@ public class MainActivity extends Activity implements LocationListener
 				.zoom(17)
 				.build();
 			googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(camPos));
+			
+			// Add a marker at the user's location
 			addMarker("Current Location", new LatLng(gpsHandler.getLat(),gpsHandler.getLon()));
 			processWiFiLocations(wifiHandler.getWifiNetworks(),gpsHandler.getLat(), gpsHandler.getLon());
 		}
@@ -163,9 +180,14 @@ public class MainActivity extends Activity implements LocationListener
 		{
 			// Check to see if it is already in there. If so, remove it.
 			removeMarker(result.SSID);
-			// Add it to our array of LocationNetworks, and to the map.
-			wifiGPS.add(new LocationNetwork(result, latitude, longitude));
-			addMarker(result, new LatLng(latitude, longitude));
+			
+			// Only plot points within given distance
+		//	if (getDistance(latitude, longitude) <= SearchActivity.getDistancePreference())
+		//	{
+				// Add it to our array of LocationNetworks, and to the map.
+				wifiGPS.add(new LocationNetwork(result, latitude, longitude));
+				addMarker(result, new LatLng(latitude, longitude));
+			//}
 		}
 	}
 	
