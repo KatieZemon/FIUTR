@@ -28,7 +28,6 @@ public class ViewAllActivity extends ListActivity {
 	NetworkAdapterItem adapter;
 	ArrayList<Network> networkList = new ArrayList<Network>();
 	private String filePath;
-	private String pageTitle; // title of page depends on whether you are viewing all or searching
 	private boolean viewAllData;
 	
 	/**
@@ -57,9 +56,7 @@ public class ViewAllActivity extends ListActivity {
 		checkFileForDuplicates();
 		getData();
 		adapter = new NetworkAdapterItem(this, R.layout.list_viewall, networkList);
-		setListAdapter(adapter);
-		
-		
+		setListAdapter(adapter);	
 		
 		// Make sure we're running on Honeycomb or higher to use ActionBar APIs
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
@@ -88,10 +85,12 @@ public class ViewAllActivity extends ListActivity {
 	 */
 	public void getData()
 	{
-		int distancePreference = SearchActivity.getDistancePreference();
-		int signalStrengthPreference = SearchActivity.getSignalStrengthPreference();
-		int numResultsPreference = SearchActivity.getNumResultsPreference();
+		int distancePreference = R.id.text_distVal;
+		int signalStrengthPreference = R.id.text_signalVal;
+		int numResultsPreference = R.id.text_resultsVal;
 		int listedResults = 0; // keep track of total results listed
+		ArrayList<String> networkNames = new ArrayList<String>();
+		boolean networkIsUnique = false;
 		
 		try
 		{
@@ -99,28 +98,42 @@ public class ViewAllActivity extends ListActivity {
 			String line;
 			while((line = reader.readLine()) != null)
 			{
+				networkIsUnique = true;
+				
 				if(line.contains("|"))
 				{
 					System.out.println("Parsing line: [ "+line+" ]");
 					// Format is: NAMEOFNETWORK|INFO_OF_NETWORK|LATITUDE|LONGITUDE
 					String[] parsedLine = line.split("\\|");
 					
-					// Viewing all data
-					if (viewAllData)
+					// Keep track of duplicates
+					for (int i = 0; i < networkNames.size(); i++)
 					{
-					  networkList.add(new Network(parsedLine[0], parsedLine[1], Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3])));
-					}
-					
-					// View only data pertaining to search result
-					else
-					{
-						if (distancePreference >= 3//getDistance(Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3]))
-								&& signalStrengthPreference > 2 // Get conversion of network signal strength
-								&& numResultsPreference > listedResults)
+						 Toast.makeText(this,parsedLine[0],Toast.LENGTH_SHORT).show();
+						if (parsedLine[0] == networkNames.get(0))
 						{
-							
-							networkList.add(new Network(parsedLine[0], parsedLine[1], Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3])));
-							listedResults++; // increment total number of results added to list
+							networkIsUnique = false;
+						}
+					}
+					if (networkIsUnique)
+					{
+						// Viewing all data
+						if (viewAllData)
+						{
+						  networkList.add(new Network(parsedLine[0], parsedLine[1], Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3])));
+						}
+						
+						// View only data pertaining to search result
+						else
+						{
+							if (distancePreference >= 3//getDistance(Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3]))
+									&& signalStrengthPreference > 2 // Get conversion of network signal strength
+									&& numResultsPreference > listedResults)
+							{
+								
+								networkList.add(new Network(parsedLine[0], parsedLine[1], Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3])));
+								listedResults++; // increment total number of results added to list
+							}
 						}
 					}
 				}
