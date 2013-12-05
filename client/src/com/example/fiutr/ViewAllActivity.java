@@ -72,8 +72,9 @@ public class ViewAllActivity extends ListActivity {
 		Location startLocation = new Location("");
 		GPSHandler h = new GPSHandler(null);
 		h.updateLocation();
-		startLocation.setLatitude(h.getLat());
-		startLocation.setLongitude(h.getLon());
+		//h.getLat();
+		startLocation.setLatitude(30);
+		startLocation.setLongitude(30);
 		
 		Location endLocation = new Location("");
 		endLocation.setLatitude(destLat);
@@ -113,7 +114,7 @@ public class ViewAllActivity extends ListActivity {
 					// View only data pertaining to search result
 					else
 					{
-						if (distancePreference >= getDistance(Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3]))
+						if (distancePreference >= 3//getDistance(Double.parseDouble(parsedLine[2]), Double.parseDouble(parsedLine[3]))
 								&& signalStrengthPreference > 2 // Get conversion of network signal strength
 								&& numResultsPreference > listedResults)
 						{

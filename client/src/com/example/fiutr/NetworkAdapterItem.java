@@ -16,49 +16,49 @@ import android.widget.TextView;
 
 public class NetworkAdapterItem extends ArrayAdapter<Network> {
 
-	Context context;
-	int resource;
-	ArrayList<Network> networkList;
-	
-	
-	public NetworkAdapterItem(Context context, int textViewResourceId, ArrayList<Network> objects)
-	{
-		super(context,textViewResourceId,objects);
-		this.context = context;
-		this.resource = textViewResourceId;
-		networkList = objects;
-	}
-	
-	@Override
-	public View getView(int position, View convertView, ViewGroup parent)
-	{
-		View row = convertView;
-		genericWifiHolder holder = null;
-		
-		if(row == null)
-		{
-			LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-			row = inflater.inflate(resource, parent, false);
-			holder = new genericWifiHolder();
-			holder.title = (TextView) row.findViewById(R.id.title);
-			holder.desc = (TextView) row.findViewById(R.id.description);
-			row.setTag(holder);
-		}
-		else
-		{
-			holder = (genericWifiHolder) row.getTag();
-		}
-		
-		Network currentItem = networkList.get(position);
-		holder.title.setText(currentItem.getName());
-		holder.desc.setText(currentItem.getDetails());
-		return row;
-	}
-	
-	static class genericWifiHolder
-	{
-		TextView title;
-		TextView desc;
-	}
+        Context context;
+        int resource;
+        ArrayList<Network> networkList;
+        
+        
+        public NetworkAdapterItem(Context context, int textViewResourceId, ArrayList<Network> objects)
+        {
+                super(context,textViewResourceId,objects);
+                this.context = context;
+                this.resource = textViewResourceId;
+                networkList = objects;
+        }
+        
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent)
+        {
+                View row = convertView;
+                genericWifiHolder holder = null;
+                
+                if(row == null)
+                {
+                        LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+                        row = inflater.inflate(resource, parent, false);
+                        holder = new genericWifiHolder();
+                        holder.title = (TextView) row.findViewById(R.id.title);
+                        holder.desc = (TextView) row.findViewById(R.id.description);
+                        row.setTag(holder);
+                }
+                else
+                {
+                        holder = (genericWifiHolder) row.getTag();
+                }
+                
+                Network currentItem = networkList.get(position);
+                holder.title.setText(currentItem.getName());
+                holder.desc.setText(currentItem.getDetails());
+                return row;
+        }
+        
+        static class genericWifiHolder
+        {
+                TextView title;
+                TextView desc;
+        }
 
 }
