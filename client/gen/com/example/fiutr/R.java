@@ -260,12 +260,11 @@ containing a value of this type.
         public static final int scan=0x7f0a0001;
     }
     public static final class string {
-        public static final int aboutInfo=0x7f060024;
+        public static final int aboutInfo=0x7f060023;
         public static final int action_about=0x7f060020;
         public static final int action_refresh=0x7f060021;
         public static final int action_scan=0x7f06001e;
         public static final int action_search=0x7f06001d;
-        public static final int action_start=0x7f060022;
         public static final int action_viewAll=0x7f06001f;
         public static final int app_name=0x7f06001a;
         /**   Title for notification shown when GooglePlayServices needs to be
@@ -363,7 +362,7 @@ containing a value of this type.
          */
         public static final int common_signin_button_text_long=0x7f060013;
         public static final int distanceVal=0x7f06001c;
-        public static final int mapHereText=0x7f060023;
+        public static final int mapHereText=0x7f060022;
         public static final int title_activity_search=0x7f06001b;
     }
     public static final class style {

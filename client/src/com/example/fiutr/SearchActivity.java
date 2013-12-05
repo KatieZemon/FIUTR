@@ -22,9 +22,9 @@ import android.support.v4.app.NavUtils;
 public class SearchActivity extends Activity {
 
 	// SeekBars for setting preferences
-	private static SeekBar prefDistSeekbar; // Seekbar for setting the distance
-	private static SeekBar prefSignalSeekbar; // Seekbar for setting the minimal signal strength
-	private static SeekBar prefResultsSeekbar; // Seekbar for setting the maximum number of results returned
+	private SeekBar prefDistSeekbar; // Seekbar for setting the distance
+	private SeekBar prefSignalSeekbar; // Seekbar for setting the minimal signal strength
+	private SeekBar prefResultsSeekbar; // Seekbar for setting the maximum number of results returned
 	
 	// Values of our preferences
 	private TextView prefDistVal; // The maximum distance away from the user's current location
@@ -145,19 +145,6 @@ public class SearchActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
-	public static int getDistance()
-	{
-		return prefDistSeekbar.getProgress();
-	}
-	
-	public static int getSignalStrength()
-	{
-		return prefSignalSeekbar.getProgress();
-	}
-	public static int getNumResults()
-	{
-		return prefResultsSeekbar.getProgress();
-	}
 
 	/**
 	 * Stores the values of each seekbar so that the next time this page is opened,
