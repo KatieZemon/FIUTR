@@ -1,22 +1,20 @@
 package com.example.fiutr;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.InetAddress;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 
 import android.app.Activity;
-import android.content.Context;
-import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class StartActivity extends Activity {
 
@@ -27,110 +25,83 @@ public class StartActivity extends Activity {
 	private String filePath = "";
 	private String fileName = "gpsMaps.txt";
 	private FileOutputStream writer;
+	private String message = "";
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		System.out.println("In on create");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_start);
 		filePath = getFilesDir().toString()+"/gpsmaps.txt";
 		System.out.println("Starting thread");
-		ClientThread thingy = new ClientThread();
-		Thread clientThread = new Thread(thingy);
-		clientThread.start();
-		thingy.kill();
-		System.out.println("Starting main activity");
-		Intent intent = new Intent(this, MainActivity.class);
-		startActivity(intent);
+		NetworkTask newtask = new NetworkTask();
+		newtask.execute();
+		//System.out.println("Starting main activity");
+		//Intent intent = new Intent(this, MainActivity.class);
+		//startActivity(intent);
 		return;
 	}
 	
-	public class ClientThread implements Runnable 
+	public class NetworkTask extends AsyncTask<Void,byte[],Boolean>
 	{
-		volatile boolean isRunning = true;
+		Socket socket;
+		InputStream nis;
+		OutputStream nos;
 		
-		public void run()
+		@Override
+		protected Boolean doInBackground(Void... params)
 		{
-			System.out.println("In runnable!");
-			while(isRunning)
+			boolean result = false;
+			try
 			{
-				Socket socket = null;
-				try
+				SocketAddress sockAddr = new InetSocketAddress(SERVER_IP, SERVER_PORT);
+				socket = new Socket();
+				socket.connect(sockAddr, 5000);
+				if(socket.isConnected())
 				{
-					System.out.println("Attempting to open socket");
-					InetAddress serverAddr = InetAddress.getByName(SERVER_IP);
-					serverStatus.setText("Connecting to server!\n");
-					socket = new Socket(serverAddr, SERVER_PORT);
-					isConnected = true;
-					while(isConnected)
+					nis = socket.getInputStream();
+					nos = socket.getOutputStream();
+					PrintStream strm = new PrintStream(nos);
+					//strm.print("ADD NETWORK thingy 44 66 -68\r\n");
+					strm.print("GET NETWORKS SUPER SPECIAL\r\n");
+					//strm.close();
+					byte[] buffer = new byte[4096];
+					int read = nis.read(buffer,0,4096);
+					while(read != -1)
 					{
-						try
-						{
-							serverStatus.append("Requesting file from server...\n");
-							PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-							out.println("GET NETWORKS\r\n");
-							serverStatus.append("Send request to server!\n");
-							out.close();
-							// Getting data
-							BufferedReader inStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-							String message = "";
-							int charsRead = 0;
-							serverStatus.append("Waiting for data from server...\n");
-							char[] buffer = new char[2048];
-							while((charsRead = inStream.read(buffer)) != -1)
-							{
-								message += new String(buffer).substring(0, charsRead);
-							}
-							//finished reading, now to write
-							try
-							{
-								serverStatus.append("Writing data from server\n");
-								writer = openFileOutput(fileName, Context.MODE_APPEND);
-								writer.write(message.getBytes());
-								writer.close();
-							}
-							catch(FileNotFoundException e)
-							{
-								System.err.println("StartActivity creating a file!\n");
-								BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath), "utf-8"));
-								writer.close();
-								run();
-							}
-							catch(Exception f)
-							{
-								System.err.println("StartActivity had an error: "+f.getMessage());
-								socket.close();
-								isConnected = false;
-							}					
-						}
-						catch(Exception j)
-						{
-							System.err.println("StartActivity had an error: "+j.getMessage());
-							socket.close();
-							isConnected = false;
-						}
+						byte[] tempData = new byte[read];
+						System.arraycopy(buffer,0,tempData,0,read);
+						System.out.println(new String(tempData));
+						read = nis.read(buffer,0,4096);
 					}
 				}
-				catch(Exception e)
+				return false;
+			}
+			catch (Exception e)
+			{
+				System.err.println("Didnt work...");
+				e.printStackTrace();
+			}
+			finally
+			{
+				try 
 				{
-					System.err.println("StartActivity had an error: "+e.getMessage());
-					try {
+					if(socket.isConnected())
 						socket.close();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-					isConnected = false;
+				} 
+				catch (IOException e) 
+				{
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
-		return;
+			return false;
 		}
 		
-	public void kill()
-	{
-		isRunning = false;
+		
 	}
+	static String convertStreamToString(java.io.InputStream is) {
+	    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+	    return s.hasNext() ? s.next() : "";
 	}
-
 }
