@@ -1,7 +1,5 @@
 package com.example.fiutr;
 
-import java.text.DecimalFormat;
-
 import android.app.AlertDialog;
 import android.content.*;
 import android.location.*;
@@ -118,8 +116,5 @@ public class GPSHandler {
 		locMan.requestLocationUpdates(provider,400,1,listener);
 		updateLocation();
 	}
-	
-
-	
 	
 }
