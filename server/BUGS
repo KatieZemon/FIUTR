@@ -1,0 +1,40 @@
+* The test suites are woefully incomplet.
+
+* Sometimes test cases randomly fail. Something is wrong. :) Fortunately,
+  everything seems to work fine with the Android client in practice.
+
+* The protocol received a last minute undocumented extension so that networks
+  could be returned in a simpler format than XML. This should become the only
+  supported behavior, and the ugly undocumented behavior removed. See
+  Connection::on_read_completed(), and the various _as_string and _as_ptree
+  functions in Database.
+
+* Prints "remote_endpoint: Bad file descriptor" sometimes when a Connection
+  object is destroyed.
+
+* Connection objects ought to be destroyed after 30s of inactivity. This was
+  removed at the last minute to avoid crashes, see
+  Connection::on_deadline_timer_expired()
+
+* Cannot handle tons of valid SSIDs - network protocol uses delimeters between
+  SSID and latitude, but an SSID is defined by length, and can contain any
+  character (including '\0'). You basically corrupt the whole entry if your
+  network name contains a space.
+
+* There is nothing to stop clients from adding fake networks.
+
+* There is no input sanitization, so clients can run arbitrary SQL on the
+  server.
+
+* The protocol defines a command used to send error messages to the other party,
+  but the server never uses it to inform the client of bad requests.
+
+* The server does not check to see if the client sent reasonable lat/lon values.
+  Not sure what happens if it were to do so.
+
+* Old networks remain in the database indefinitely. The server should store the
+  time a network was added to the database, and a systemd timer unit should run
+  daily to purge old networks.
+
+* The server is constructed to primarily use asynchronous I/O, but database
+  accesses are synchronous.
