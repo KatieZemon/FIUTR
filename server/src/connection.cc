@@ -50,6 +50,7 @@ Connection::~Connection()
   }
   catch (boost::system::system_error& e)
   {
+    // FIXME catching lots of "bad file descriptor" errors :(
     safe_journal(SD_ERR, e.what());
   }
 }
