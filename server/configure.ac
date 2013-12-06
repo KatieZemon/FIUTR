@@ -3,7 +3,7 @@ AC_INIT([groupgd],[0.1])
 AC_CONFIG_SRCDIR([src/main.cc])
 AC_CONFIG_MACRO_DIR([m4])
 
-AM_INIT_AUTOMAKE([1.13 foreign dist-xz no-dist-gzip -Wall])
+AM_INIT_AUTOMAKE([1.13 foreign -Wall])
 AM_SILENT_RULES([yes])
 AM_MAINTAINER_MODE([enable])
 
