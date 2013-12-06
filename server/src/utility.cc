@@ -31,6 +31,13 @@
 
 namespace groupgd {
 
+/**
+ * Retrieves a line ending in CRLF from a streambuf.
+ *
+ * @param streambuf to read from
+ *
+ * @return the line read, CRLF pruned
+ */
 std::string
 read_line_from_streambuf(std::streambuf* streambuf)
 {
@@ -43,6 +50,13 @@ read_line_from_streambuf(std::streambuf* streambuf)
   return response;
 }
 
+/**
+ * Read from a streambuf until the streambuf is empty.
+ *
+ * @param streambuf to read from
+ *
+ * @return contents of the streambuf
+ */
 std::string
 read_all_from_streambuf(std::streambuf* streambuf)
 {
@@ -58,6 +72,13 @@ read_all_from_streambuf(std::streambuf* streambuf)
   return response;
 }
 
+/**
+ * Converts the contents of a streambuf to a property tree.
+ *
+ * @param streambuf must contain valid XML, and must be UTF-8 encoded
+ *
+ * @return contents of streambuf as a ptree
+ */
 boost::property_tree::ptree
 streambuf_to_ptree(std::streambuf* streambuf)
 {
@@ -67,6 +88,13 @@ streambuf_to_ptree(std::streambuf* streambuf)
   return result;
 }
 
+/**
+ * Converts the contents of a streambuf to XML.
+ *
+ * @param ptree to be converted
+ *
+ * @return contents as XML
+ */
 std::string
 ptree_to_string(const boost::property_tree::ptree& ptree)
 {
@@ -75,6 +103,13 @@ ptree_to_string(const boost::property_tree::ptree& ptree)
   return read_all_from_streambuf(ss.rdbuf());
 }
 
+/**
+ * Grabs a mutex before recording a message to clog.
+ * FIXME would be nice to accept format specifiers...
+ *
+ * @param priority syslog-style log priority, see sd-deamon(3)
+ * @param message to be logged
+ */
 void
 safe_journal(const char* priority, std::string message)
 {

@@ -26,8 +26,14 @@
 
 namespace groupgd {
 
+/**
+ * Two networks within this range of each other are considered identical.
+ */
 const int IDENTICAL_NETWORK_METERS = 40;
 
+/**
+ * Stores all fields of a network. Strings are used to maintain precision.
+ */
 struct Network
 {
   std::string name;
@@ -36,7 +42,6 @@ struct Network
   std::string strength;
 };
 
-// Equivalent if very close and have same SSID
 bool
 operator==(Network n1, Network n2);
 

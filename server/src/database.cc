@@ -38,6 +38,9 @@
 
 namespace groupgd {
 
+/**
+ * Create a new Database handle.
+ */
 Database::Database()
 {
   open_database();
@@ -54,6 +57,9 @@ Database::Database()
     }
 }
 
+/**
+ * Opens the database db_.
+ */
 void
 Database::open_database()
 {
@@ -69,6 +75,9 @@ Database::open_database()
     }
 }
 
+/**
+ * Creates the table Networks if it does not already exist.
+ */
 void
 Database::ensure_network_table_exists()
 {
@@ -86,6 +95,11 @@ Database::ensure_network_table_exists()
     }
 }
 
+/**
+ * Adds a Network to the database.
+ *
+ * @param network the network to be added
+ */
 void
 Database::add_network(const Network& network)
 {
@@ -119,6 +133,11 @@ Database::add_network(const Network& network)
   safe_journal(SD_DEBUG, "Executed query " + oss.str());
 }
 
+/**
+ * Removes a Network from the database.
+ *
+ * @param network the network to be removed
+ */
 void
 Database::remove_network(const Network& network)
 {
@@ -138,6 +157,17 @@ Database::remove_network(const Network& network)
   safe_journal(SD_DEBUG, "Executed query " + oss.str());
 }
 
+/**
+ * Add a network row from the database to a ptree. Intended to be passed as a
+ * callback to sqlite3_exec()
+ *
+ * @param ptree the ptree to be modified, cast to a void*
+ * @param rows FIXME I think this is actually the number of columns
+ * @param column_text array of contents of each column
+ * @param column_name array of names of each column
+ *
+ * @return 0 on success, -1 on failure
+ */
 static int
 add_row_to_ptree(void* ptree, int rows, char** column_text, char** column_name)
 {
@@ -159,8 +189,13 @@ add_row_to_ptree(void* ptree, int rows, char** column_text, char** column_name)
   return 0;
 }
 
+/**
+ * Retrieves a ptree containing all networks in the database.
+ * 
+ * @return all networks in the database, as a ptree
+ */ 
 boost::property_tree::ptree
-Database::all_networks() const
+Database::all_networks_as_ptree() const
 {
   char* errmsg = nullptr;
   boost::property_tree::ptree result;
@@ -179,6 +214,74 @@ Database::all_networks() const
   return result;
 }
 
+/**
+ * Add a network row from the database to a string, one network per line ending
+ * with CRLF, fields delimited by bars. Intended to be passed as a callback to
+ * to sqlite3_exec()
+ *
+ * @param string the string to be modified, cast to a void*
+ * @param rows FIXME I think this is actually the number of columns
+ * @param column_text array of contents of each column
+ * @param column_name array of names of each column
+ *
+ * @return 0 on success, -1 on failure
+ */
+static int
+add_row_to_string(void* string, int rows, char** column_text, char** column_name)
+{
+  try
+    {
+      auto networks = reinterpret_cast<std::string*>(string);
+      for (int i = 0; i < rows; ++i, ++column_text, ++column_name)
+        {
+          *networks += std::string{*column_text} + "|";
+        }
+      *networks += "\r\n";
+     }
+   catch (std::exception& e)
+     {
+       safe_journal(SD_ERR, std::string{"Processing row: "} + e.what());
+       return -1;
+     }
+  return 0;
+}
+
+/**
+ * Retrieves a string containing all networks in the database, one network per
+ * line ending with CRLF, fields delimited by bars.
+ *
+ * @return string containing all networks in the database
+ */
+std::string
+Database::all_networks_as_string() const
+{
+  char* errmsg = nullptr;
+  std::string result;
+  if (sqlite3_exec(db_,
+                   "SELECT * FROM Networks",
+                   &add_row_to_string,
+                   reinterpret_cast<void*>(&result),
+                   &errmsg) != SQLITE_OK)
+    {
+      std::string reason{errmsg};
+      sqlite3_free(errmsg);
+      throw std::runtime_error{"Can't get networks: " + reason};
+    }
+  safe_journal(SD_DEBUG, "Executed query SELECT * FROM Networks");
+  return result + "\r\n";
+}
+
+/**
+ * Appends a network row from the database to a vector of Networks. Intended to
+ * be passed as a callback to sqlite3_exec()
+ *
+ * @param vector the vector to be appended to, cast to a void*
+ * @param rows FIXME I think this is actually the number of columns
+ * @param column_text array of contents of each column
+ * @param column_name array of names of each column
+ *
+ * @return 0 on success, -1 on failure
+ */
 static int
 append_network_from_row(void* list, int rows,
                         char** column_text, char** column_name)
@@ -210,6 +313,13 @@ append_network_from_row(void* list, int rows,
   return 0;
 }
 
+/**
+ * Retrieves all networks in the database with a particular SSID.
+ *
+ * @param name the SSID to match
+ *
+ * @return a vector containing all networks matching name
+ */
 std::vector<Network>
 Database::networks_with_ssid(std::string name)
 {
@@ -232,6 +342,9 @@ Database::networks_with_ssid(std::string name)
   return networks;
 }
 
+/**
+ * Closes the database db_.
+ */
 Database::~Database()
 {
   if (sqlite3_close(db_) != SQLITE_OK)

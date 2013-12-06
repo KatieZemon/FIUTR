@@ -38,6 +38,9 @@
 
 namespace groupgd {
 
+/**
+ * Access the singleton instance of the ConnectionManager.
+ */
 ConnectionManager&
 ConnectionManager::instance()
 {
@@ -45,11 +48,18 @@ ConnectionManager::instance()
   return manager;
 }
 
+/**
+ * Closes the acceptor socket.
+ */
 ConnectionManager::~ConnectionManager()
 {
   acceptor_.close();
 }
 
+/**
+ * Runs the ConnectionManager. You should only call this once in your program.
+ * run() will exit once all clients have disconnected.
+ */
 void
 ConnectionManager::run()
 {
@@ -98,6 +108,9 @@ ConnectionManager::run()
     std::exit(exit_status_);
 }
 
+/**
+ * Create a new ConnectionManager.
+ */
 ConnectionManager::ConnectionManager()
 : acceptor_(acceptor_io_service_), 
   signal_set_(acceptor_io_service_, SIGHUP, SIGTERM)
@@ -110,6 +123,10 @@ ConnectionManager::ConnectionManager()
   acceptor_.assign(boost::asio::ip::tcp::v4(), SD_LISTEN_FDS_START);
 }
 
+/**
+ * Synchronously accepts a connection from the acceptor socket. Asynchronously
+ * runs the client/server protocol for that connection.
+ */
 void
 ConnectionManager::accept_initial_connection()
 {
@@ -118,6 +135,11 @@ ConnectionManager::accept_initial_connection()
   connection->async_run();
 }
 
+/**
+ * Accepts a connection from the acceptor socket, asynchronously runs the
+ * client/server protocol for that connection, and continues listening for
+ * more sockets.
+ */
 void
 ConnectionManager::async_accept_additional_connections()
 {
@@ -132,6 +154,12 @@ ConnectionManager::async_accept_additional_connections()
                          });
 }
 
+/**
+ * Cleanly handles SIGTERM and ignores SIGHUP.
+ *
+ * @param ec used to indicate an error or cancellation
+ * @param signal_number the POSIX signal that has been caught
+ */
 void
 ConnectionManager::handle_signal(const boost::system::error_code& ec, 
                                  int signal_number)

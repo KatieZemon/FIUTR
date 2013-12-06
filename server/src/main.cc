@@ -41,12 +41,13 @@ main()
   try
     {
       groupgd::ConnectionManager::instance().run();
-      sleep(1);
     }
   catch (std::exception& e)
     {
       groupgd::safe_journal(SD_CRIT, e.what());
-      sleep(1);
       std::exit(EXIT_FAILURE);
     }
+
+    // FIXME shouldn't be necessary, but makes the testcases pass more reliably 
+    sleep(1);
 }

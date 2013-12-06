@@ -30,6 +30,11 @@
 
 namespace groupgd {
 
+/**
+ * Manages all instances of Connection objects. Call run() to start listening
+ * for clients and spawning Connection objects to handle them. This class is a
+ * singleton.
+ */
 class ConnectionManager
 {
 public:

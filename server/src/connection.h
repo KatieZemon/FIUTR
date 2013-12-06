@@ -33,8 +33,20 @@
 
 namespace groupgd {
 
+/**
+ * How long to wait for a request from the client before disconnecting him.
+ */
 const auto TIMEOUT = boost::posix_time::seconds{30};
 
+/**
+ * Represents an implementation of the client/server protocol between the server
+ * and one individual client. After instantiating a new Connection, the user
+ * must manually accept a client on the Connection's socket (using
+ * mutable_socket()). After accepting a client, call async_run to start the
+ * Connection, then stop worrying about it. The Connection will stay alive by
+ * posting shared_ptrs to itself onto its io_service. (The io_service is
+ * to remain alive for the duration of the program.)
+ */
 class Connection : public std::enable_shared_from_this<Connection>
 {
 public:
@@ -74,7 +86,10 @@ private:
   async_add_network_to_database(std::string query);
 
   void
-  async_send_networks_to_client();
+  async_send_networks_to_client_as_ptree();
+
+  void
+  async_send_networks_to_client_as_string();
 
   void
   handle_error_claim(std::string query);

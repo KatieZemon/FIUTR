@@ -45,7 +45,16 @@ ptree_to_string(const boost::property_tree::ptree& ptree);
 void
 safe_journal(const char* priority, std::string message);
 
-// http://stackoverflow.com/a/17341
+/**
+ * Tests two floating point values to see if they are effectively the same.
+ *
+ * [1] http://stackoverflow.com/a/17341
+ *
+ * @param a the first value to test
+ * @param b the second value to test
+ *
+ * @return true if the values are extremely close to equivalent
+ */
 template <typename T>
   bool
   nearly_equal(T a, T b)

@@ -29,6 +29,15 @@
 
 namespace groupgd {
 
+/**
+ * Tests two Networks for equivalence. Networks are equivalent if they have the
+ * same SSID and are within a small distance of each other.
+ *
+ * @param n1 one Network to test
+ * @param n2 the other Network to test
+ *
+ * @return true if both Networks are equivalent
+ */
 bool
 operator==(Network n1, Network n2)
 {
@@ -42,20 +51,44 @@ operator==(Network n1, Network n2)
               || distance(n1, n2) <= IDENTICAL_NETWORK_METERS);
 }
 
+/**
+ * Tests two Networks for equivalence.
+ *
+ * @param n1 one Network to test
+ * @param n2 the other Network to test
+ *
+ * @return false if both Networks are equivalent
+ */
 bool
 operator!=(Network n1, Network n2)
 {
   return !(n1 == n2);
 }
 
+/**
+ * The haversin function f(n) = sin^2(n/2)
+ *
+ * @param angle in radians
+ *
+ * @return real number
+ */
 static double
 haversin(double theta)
 {
   return std::pow(std::sin(theta/2), 2);
 }
 
-// http://en.wikipedia.org/wiki/Haversine_formula
-// in meters, assumes a perfectly spherical Earth
+/**
+ * Calculates the distance between two Networks using the Haversine formula [1].
+ * Assumes a perfectly spherical Earth.
+ *
+ * [1] http://en.wikipedia.org/wiki/Haversine_formula
+ *
+ * @param n1 the first Network
+ * @param n2 the second Network
+ *
+ * @return distance between n1 and n2, in meters
+ */
 float
 distance(Network n1, Network n2)
 {

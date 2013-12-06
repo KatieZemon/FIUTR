@@ -34,6 +34,9 @@ namespace groupgd {
 
 struct Network;
 
+/**
+ * An object for handling database accesses.
+ */
 class Database
 {
 public:
@@ -45,7 +48,10 @@ public:
   add_network(const Network& network);
 
   boost::property_tree::ptree
-  all_networks() const;
+  all_networks_as_ptree() const;
+
+  std::string
+  all_networks_as_string() const;
 
 private:
   Database(const Database&) = delete;

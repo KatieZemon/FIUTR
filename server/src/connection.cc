@@ -36,25 +36,37 @@
 
 namespace groupgd {
 
+/**
+ * Construct a new Connection.
+ *
+ * @param io_service the io_service that will schedule all the operations of
+ *                   this connection
+ */
 Connection::Connection(boost::asio::io_service* io_service)
 : deadline_timer_(*io_service), socket_(*io_service)
 { }
 
+/**
+ * Attempts to close the socket before the Connection is destroyed.
+ */
 Connection::~Connection()
 {
-  safe_journal(SD_DEBUG, "Client "
-      + socket_.remote_endpoint().address().to_string() + " disconnected");
   try
   {
+    safe_journal(SD_DEBUG, "Client "
+        + socket_.remote_endpoint().address().to_string() + " disconnected");
     stop();
   }
-  catch (boost::system::system_error& e)
+  catch (std::exception& e)
   {
     // FIXME catching lots of "bad file descriptor" errors :(
     safe_journal(SD_ERR, e.what());
   }
 }
 
+/**
+ * Call after a client has been accepted to initiate the client/server protocol.
+ */
 void
 Connection::async_run()
 {
@@ -66,6 +78,9 @@ Connection::async_run()
   async_await_client_query();
 }
 
+/**
+ * Start waiting for a request from the client.
+ */
 void
 Connection::async_await_client_query()
 {
@@ -76,17 +91,19 @@ Connection::async_await_client_query()
                                           std::placeholders::_1));
 }
 
+/**
+ * FIXME see BUGS
+ */
 void
-Connection::on_deadline_timer_expired(const boost::system::error_code& ec)
+Connection::on_deadline_timer_expired(const boost::system::error_code&)
 {
-  if (ec == boost::asio::error::operation_aborted)
-    return;
-
-  deadline_timer_.async_wait(std::bind(&Connection::on_deadline_timer_expired,
-                                       shared_from_this(),
-                                       std::placeholders::_1));
 }
 
+/**
+ * After a read has been completed, respond to the request.
+ *
+ * @param ec indicates an error in performing the read
+ */
 void
 Connection::on_read_completed(const boost::system::error_code& ec)
 {
@@ -97,7 +114,10 @@ Connection::on_read_completed(const boost::system::error_code& ec)
       // These operations are themselves responsible for calling
       // async_await_client_query when they are finished.
       if (query == "GET NETWORKS")
-        async_send_networks_to_client();
+        async_send_networks_to_client_as_ptree();
+      // FIXME ugly and undocumented
+      else if (query == "GET NETWORKS SUPER SPECIAL")
+        async_send_networks_to_client_as_string();
       else if (query.find("ADD NETWORK") == 0)
         async_add_network_to_database(query);
       else if (query.find("ERROR") == 0)
@@ -112,6 +132,11 @@ Connection::on_read_completed(const boost::system::error_code& ec)
     }
 }
 
+/**
+ * After a write has completed, await another request from the client.
+ *
+ * @param ec indicates an error in performing the write
+ */
 void
 Connection::on_write_completed(const boost::system::error_code& ec,
                                std::size_t /*bytes_transferred*/)
@@ -126,6 +151,12 @@ Connection::on_write_completed(const boost::system::error_code& ec,
     }
 }
 
+/**
+ * Interprates an ADD_NETWORK command from the client and adds the network
+ * to the database.
+ *
+ * @param query the complete ADD NETWORK command, minus trailing CRLF
+ */
 void
 Connection::async_add_network_to_database(std::string query)
 {
@@ -144,6 +175,11 @@ Connection::async_add_network_to_database(std::string query)
   async_await_client_query();
 }
 
+/**
+ * Logs an error reported by the client, then stops this Connection.
+ *
+ * @param query the complete ERROR command, minus trailing CRLF
+ */
 void
 Connection::handle_error_claim(std::string query)
 {
@@ -153,11 +189,15 @@ Connection::handle_error_claim(std::string query)
   stop();
 }
 
+/**
+ * Sends all networks to the client as a ptree, then awaits further commands
+ * from the client.
+ */
 void
-Connection::async_send_networks_to_client()
+Connection::async_send_networks_to_client_as_ptree()
 {
   deadline_timer_.expires_from_now(TIMEOUT);
-  auto ptree = database_.all_networks();
+  auto ptree = database_.all_networks_as_ptree();
   safe_journal(SD_DEBUG, "Sending to client: " + ptree_to_string(ptree));
   std::ostream ostream{&streambuf_};
   boost::property_tree::write_xml(ostream, ptree);
@@ -168,6 +208,23 @@ Connection::async_send_networks_to_client()
                                      std::placeholders::_2));
 }
 
+/**
+ * Sends all networks to the client as a string, then awaits further commands
+ * from the client.
+ */
+void
+Connection::async_send_networks_to_client_as_string()
+{
+  deadline_timer_.expires_from_now(TIMEOUT);
+  auto string = database_.all_networks_as_string();
+  safe_journal(SD_DEBUG, "Sending to client: " + string);
+  boost::asio::write(socket_, boost::asio::buffer(string));
+  async_await_client_query();
+}
+
+/**
+ * Cancels the deadline timer and closes the socket.
+ */
 void
 Connection::stop()
 {
